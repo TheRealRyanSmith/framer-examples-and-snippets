@@ -2,10 +2,15 @@
 # Ryan Smith | Smithx.net | @byryan
 
 # Set Default Animation
-Framer.Defaults.Animation = {
+Framer.Defaults.Animation =
 	curve: "spring(150, 22, 0)"
 	time: 0.4
-}
+# Target color
+targetColor = null
+# targetColor = "hsla(192, 100%, 80%, 0.72)"
+
+
+
 
 ###
 Layers
@@ -36,7 +41,7 @@ statusBarWhite = new Layer
 composeTapArea = new Layer
 	maxX: Screen.width, maxY: Screen.height
 	width: 112,	height: 96
-	opacity: 0
+	backgroundColor: targetColor
 	superLayer: inboxView
 
 # Compose View
@@ -48,36 +53,37 @@ composeView = new Layer
 # Tap Area for Cancel Icon
 cancelTapArea = new Layer
 	width: 200, height: 100
-	opacity: 0
+	backgroundColor: targetColor
 	superLayer: composeView
+
+
+
 
 ###
 States
 ###
 
 # toggle black status bar
-statusBarBlack.states.add({
-	on: { opacity: 1 },
-	off: { opacity: 0 },
-})
+statusBarBlack.states.add
+	on: opacity: 1 
+	off: opacity: 0 
 
 # toggle white status bar
-statusBarWhite.states.add({
-	on: { opacity: 1 },
-	off: { opacity: 0 },
-})
+statusBarWhite.states.add
+	on: opacity: 1
+	off: opacity: 0
 
 # scale inbox view
-inboxView.states.add({
-	default: { scale: 1 },
-	scaled: { scale: 0.92, maxY: Screen.height },
-})
+inboxView.states.add
+	default: scale: 1
+	scaled: scale: 0.92, maxY: Screen.height
 
 # reposition compose view
-composeView.states.add({
-	default: { y: Screen.height },
-	active: { y: 72 },
-})
+composeView.states.add
+	default: y: Screen.height
+	active: y: 72
+
+
 
 
 ###
@@ -97,3 +103,4 @@ cancelTapArea.on Events.Click, ->
 	composeView.states.switch("default")
 	statusBarBlack.states.switch("on")
 	statusBarWhite.states.switch("off")
+
