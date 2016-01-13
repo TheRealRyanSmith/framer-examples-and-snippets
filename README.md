@@ -6,14 +6,15 @@
 
 ![Sketch Layers (left) and Framer Code (right)](Snippets/how_to_scroll.png)
 
+```coffee
 # mask a wrapped layer group in a scroll component
-scroll = ScrollComponent.wrap sk.group
-# contrain scrolling
+scroll = ScrollComponent.wrap sketch.group
+# constrain scrolling
 scroll.scrollHorizontal = false
 # set padding
 scroll.contentInset = 
     bottom: 90
-t
+```
 
 # Create a scroll component
 scroller = new ScrollComponent
