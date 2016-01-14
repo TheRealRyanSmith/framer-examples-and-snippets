@@ -65,3 +65,22 @@ arrayOfObjects = [
 print arrayOfObjects[0].name
 print arrayOfObjects[0].favoriteColor
 ```
+
+
+
+
+## Text
+
+```coffee
+layerA = new Layer
+	width: Screen.width, height: 100
+	backgroundColor: null
+	html: "My Label"
+	style:
+		"font-size": "72px"
+		"font-weight": "200"
+		"color": "#ffffff"
+		"line-height": "100px"
+		"text-align": "center"
+layerA.center()
+```
