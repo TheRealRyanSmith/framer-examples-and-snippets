@@ -2,6 +2,17 @@
 
 *Organizing my Framer Studio examples and snippets.*
 
+## Sketch / Photoshop Import
+
+Remove the need to preceded the layer name with the file name when importing Sketch of Photoshop files by adding 'Utils.globalLayers(mySketchFile)' below the importer line. For example:
+
+```coffee
+# Import file "mySketchFile"
+mySketchFile = Framer.Importer.load("imported/grid-images@1x")
+
+Utils.globalLayers(mySketchFile)
+```
+
 ## Scrolling
 
 ```coffee
@@ -35,7 +46,7 @@ scroll = ScrollComponent.wrap sketch.group
 scroll.scrollHorizontal = false
 
 # set padding
-scroll.contentInset = 
+scroll.contentInset =
     bottom: 90
 ```
 
@@ -72,6 +83,7 @@ print arrayOfObjects[0].favoriteColor
 ## Text
 
 ```coffee
+# Adding a label to a layer and styling text
 layerA = new Layer
 	width: Screen.width, height: 100
 	backgroundColor: null
