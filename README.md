@@ -13,6 +13,21 @@ mySketchFile = Framer.Importer.load("imported/grid-images@1x")
 Utils.globalLayers(mySketchFile)
 ```
 
+## Lighten
+
+How to use .lighten and .darken:
+
+```coffee
+keyColor = new Color("#1d61f0")
+
+layers = []
+for i in [0..3]
+	layer = new Layer
+		width: 250, height: 250
+		x: 250 * i
+		backgroundColor: keyColor.lighten(5)
+```
+
 ## Scrolling
 
 ```coffee
