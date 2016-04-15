@@ -99,15 +99,16 @@ print arrayOfObjects[0].favoriteColor
 
 ```coffee
 # Adding a label to a layer and styling text
-layerA = new Layer
-	width: Screen.width, height: 100
-	backgroundColor: null
+navBar = new Layer
+	width: Screen.width
+	height: 128
+	backgroundColor: "rgba(21,21,23,1)"
 	html: "My Label"
 	style:
-		"font-size": "72px"
-		"font-weight": "200"
+		"font-family": "-apple-system"
+		"font-size": "32px"
 		"color": "#ffffff"
-		"line-height": "100px"
+		"font-weight": "500"
+		"line-height": "148px"
 		"text-align": "center"
-layerA.center()
 ```
