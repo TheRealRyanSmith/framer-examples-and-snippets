@@ -106,7 +106,7 @@ navBar = new Layer
 	html: "My Label"
 	style:
 		"font-family": "-apple-system"
-		"font-size": "32px"
+		"font-size": "34px"
 		"color": "#ffffff"
 		"font-weight": "500"
 		"line-height": "148px"
