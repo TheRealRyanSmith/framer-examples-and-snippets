@@ -48,39 +48,47 @@
 	
 	_ = __webpack_require__(1)._;
 	
+	if (window.ontouchstart === void 0) {
+	  window.ontouchstart = null;
+	}
+	
 	Framer = {};
 	
 	Framer._ = _;
 	
 	Framer.Utils = __webpack_require__(4);
 	
-	Framer.Color = (__webpack_require__(9)).Color;
+	Framer.Color = (__webpack_require__(10)).Color;
 	
-	Framer.Layer = (__webpack_require__(12)).Layer;
+	Framer.Layer = (__webpack_require__(13)).Layer;
 	
-	Framer.BackgroundLayer = (__webpack_require__(32)).BackgroundLayer;
+	Framer.BackgroundLayer = (__webpack_require__(35)).BackgroundLayer;
 	
-	Framer.VideoLayer = (__webpack_require__(33)).VideoLayer;
+	Framer.VideoLayer = (__webpack_require__(36)).VideoLayer;
 	
-	Framer.Events = (__webpack_require__(14)).Events;
+	Framer.Events = (__webpack_require__(15)).Events;
 	
-	Framer.Animation = (__webpack_require__(16)).Animation;
+	Framer.Gestures = (__webpack_require__(16)).Gestures;
 	
-	Framer.AnimationGroup = (__webpack_require__(34)).AnimationGroup;
+	Framer.Animation = (__webpack_require__(18)).Animation;
+	
+	Framer.AnimationGroup = (__webpack_require__(37)).AnimationGroup;
 	
 	Framer.Screen = (__webpack_require__(5)).Screen;
 	
-	Framer.Canvas = (__webpack_require__(35)).Canvas;
+	Framer.Canvas = (__webpack_require__(38)).Canvas;
 	
-	Framer.print = (__webpack_require__(36)).print;
+	Framer.Align = (__webpack_require__(39)).Align;
 	
-	Framer.ScrollComponent = (__webpack_require__(39)).ScrollComponent;
+	Framer.print = (__webpack_require__(40)).print;
 	
-	Framer.PageComponent = (__webpack_require__(40)).PageComponent;
+	Framer.ScrollComponent = (__webpack_require__(43)).ScrollComponent;
 	
-	Framer.SliderComponent = (__webpack_require__(41)).SliderComponent;
+	Framer.PageComponent = (__webpack_require__(44)).PageComponent;
 	
-	Framer.DeviceComponent = (__webpack_require__(42)).DeviceComponent;
+	Framer.SliderComponent = (__webpack_require__(45)).SliderComponent;
+	
+	Framer.DeviceComponent = (__webpack_require__(46)).DeviceComponent;
 	
 	Framer.DeviceView = Framer.DeviceComponent;
 	
@@ -88,35 +96,35 @@
 	  _.extend(window, Framer);
 	}
 	
-	Framer.Context = (__webpack_require__(37)).Context;
+	Framer.Context = (__webpack_require__(41)).Context;
 	
-	Framer.Config = (__webpack_require__(13)).Config;
+	Framer.Config = (__webpack_require__(14)).Config;
 	
 	Framer.EventEmitter = (__webpack_require__(7)).EventEmitter;
 	
 	Framer.BaseClass = (__webpack_require__(6)).BaseClass;
 	
-	Framer.LayerStyle = (__webpack_require__(23)).LayerStyle;
+	Framer.LayerStyle = (__webpack_require__(25)).LayerStyle;
 	
-	Framer.AnimationLoop = (__webpack_require__(43)).AnimationLoop;
+	Framer.AnimationLoop = (__webpack_require__(47)).AnimationLoop;
 	
-	Framer.LinearAnimator = (__webpack_require__(17)).LinearAnimator;
+	Framer.LinearAnimator = (__webpack_require__(19)).LinearAnimator;
 	
-	Framer.BezierCurveAnimator = (__webpack_require__(19)).BezierCurveAnimator;
+	Framer.BezierCurveAnimator = (__webpack_require__(21)).BezierCurveAnimator;
 	
-	Framer.SpringDHOAnimator = (__webpack_require__(22)).SpringDHOAnimator;
+	Framer.SpringDHOAnimator = (__webpack_require__(24)).SpringDHOAnimator;
 	
-	Framer.SpringRK4Animator = (__webpack_require__(20)).SpringRK4Animator;
+	Framer.SpringRK4Animator = (__webpack_require__(22)).SpringRK4Animator;
 	
-	Framer.LayerDraggable = (__webpack_require__(25)).LayerDraggable;
+	Framer.LayerDraggable = (__webpack_require__(27)).LayerDraggable;
 	
-	Framer.Importer = (__webpack_require__(44)).Importer;
+	Framer.Importer = (__webpack_require__(48)).Importer;
 	
-	Framer.Debug = (__webpack_require__(45)).Debug;
+	Framer.Extras = __webpack_require__(49);
 	
-	Framer.Extras = __webpack_require__(46);
+	Framer.GestureInputRecognizer = new (__webpack_require__(53)).GestureInputRecognizer;
 	
-	Framer.Version = __webpack_require__(49);
+	Framer.Version = __webpack_require__(54);
 	
 	Framer.Loop = new Framer.AnimationLoop();
 	
@@ -126,9 +134,17 @@
 	  window.Framer = Framer;
 	}
 	
+	Defaults = (__webpack_require__(17)).Defaults;
+	
+	Defaults.setup();
+	
+	Framer.resetDefaults = Defaults.reset;
+	
 	Framer.DefaultContext = new Framer.Context({
 	  name: "Default"
 	});
+	
+	Framer.DefaultContext.backgroundColor = "white";
 	
 	Framer.CurrentContext = Framer.DefaultContext;
 	
@@ -136,11 +152,9 @@
 	  Framer.Extras.MobileScrollFix.enable();
 	}
 	
-	Defaults = (__webpack_require__(15)).Defaults;
-	
-	Defaults.setup();
-	
-	Framer.resetDefaults = Defaults.reset;
+	if (!Utils.isTouch()) {
+	  Framer.Extras.TouchEmulator.enable();
+	}
 
 
 /***/ },
@@ -12528,13 +12542,15 @@
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Screen, Utils, _, __domComplete, __domReady, _textSizeNode,
+	var Matrix, Screen, Utils, _, __domComplete, __domCompleteState, __domReady, _textSizeNode,
 	  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
 	  slice = [].slice;
 	
 	_ = __webpack_require__(1)._;
 	
 	Screen = __webpack_require__(5).Screen;
+	
+	Matrix = __webpack_require__(9).Matrix;
 	
 	Utils = {};
 	
@@ -12550,14 +12566,14 @@
 	};
 	
 	Utils.getValueForKeyPath = function(obj, key) {
-	  var len, m, ref, ref1, result;
+	  var len, o, ref, ref1, result;
 	  result = obj;
 	  if (ref = !".", indexOf.call(key, ref) >= 0) {
 	    return obj[key];
 	  }
 	  ref1 = key.split(".");
-	  for (m = 0, len = ref1.length; m < len; m++) {
-	    key = ref1[m];
+	  for (o = 0, len = ref1.length; o < len; o++) {
+	    key = ref1[o];
 	    result = result[key];
 	  }
 	  return result;
@@ -12623,6 +12639,13 @@
 	  } else {
 	    return (sorted[(sorted.length / 2) - 1] + sorted[sorted.length / 2]) / 2;
 	  }
+	};
+	
+	Utils.nearestIncrement = function(x, increment) {
+	  if (!increment) {
+	    return x;
+	  }
+	  return Math.round(x * (1 / increment)) / (1 / increment);
 	};
 	
 	if (window.requestAnimationFrame == null) {
@@ -12748,7 +12771,7 @@
 	};
 	
 	Utils.defineEnum = function(names, offset, geometric) {
-	  var Enum, i, j, len, m, name;
+	  var Enum, i, j, len, name, o;
 	  if (names == null) {
 	    names = [];
 	  }
@@ -12759,7 +12782,7 @@
 	    geometric = 0;
 	  }
 	  Enum = {};
-	  for (i = m = 0, len = names.length; m < len; i = ++m) {
+	  for (i = o = 0, len = names.length; o < len; i = ++o) {
 	    name = names[i];
 	    j = i;
 	    j = !offset ? j : j + offset;
@@ -12805,7 +12828,7 @@
 	};
 	
 	Utils.inspectObjectType = function(item) {
-	  var className, extract, ref, ref1, ref2;
+	  var className, extract, ref, ref1, ref2, ref3;
 	  if ((((ref = item.constructor) != null ? ref.name : void 0) != null) && ((ref1 = item.constructor) != null ? ref1.name : void 0) !== "Object") {
 	    return item.constructor.name;
 	  }
@@ -12821,15 +12844,19 @@
 	    }
 	    return null;
 	  };
-	  className = extract(item.toString());
-	  if (className) {
-	    return className;
+	  if (item.toString) {
+	    className = extract(item.toString());
+	    if (className) {
+	      return className;
+	    }
 	  }
-	  className = extract((ref2 = item.constructor) != null ? ref2.toString() : void 0);
-	  if (className) {
-	    return className.replace("Constructor", "");
+	  if ((ref2 = item.constructor) != null ? ref2.toString : void 0) {
+	    className = extract((ref3 = item.constructor) != null ? ref3.toString() : void 0);
+	    if (className) {
+	      return className.replace("Constructor", "");
+	    }
 	  }
-	  return item;
+	  return "Object";
 	};
 	
 	Utils.inspect = function(item, max, l) {
@@ -12892,11 +12919,11 @@
 	};
 	
 	Utils.uuid = function() {
-	  var chars, digit, m, output, r, random;
+	  var chars, digit, o, output, r, random;
 	  chars = "0123456789abcdefghijklmnopqrstuvwxyz".split("");
 	  output = new Array(36);
 	  random = 0;
-	  for (digit = m = 1; m <= 32; digit = ++m) {
+	  for (digit = o = 1; o <= 32; digit = ++o) {
 	    if (random <= 0x02) {
 	      random = 0x2000000 + (Math.random() * 0x1000000) | 0;
 	    }
@@ -12953,7 +12980,7 @@
 	};
 	
 	Utils.isTouch = function() {
-	  return window.ontouchstart === null;
+	  return window.ontouchstart === null && window.ontouchmove === null && window.ontouchend === null;
 	};
 	
 	Utils.isDesktop = function() {
@@ -13009,6 +13036,26 @@
 	
 	Utils.isFramerStudio = function() {
 	  return navigator.userAgent.indexOf("FramerStudio") !== -1;
+	};
+	
+	Utils.framerStudioVersion = function() {
+	  var isBeta, isFuture, isLocal, matches, version;
+	  if (Utils.isFramerStudio()) {
+	    isBeta = navigator.userAgent.indexOf("FramerStudio/beta") >= 0;
+	    isLocal = navigator.userAgent.indexOf("FramerStudio/local") >= 0;
+	    isFuture = navigator.userAgent.indexOf("FramerStudio/future") >= 0;
+	    if (isBeta || isLocal || isFuture) {
+	      return Number.MAX_VALUE;
+	    }
+	    matches = navigator.userAgent.match(/\d+$/);
+	    if (matches && matches.length > 0) {
+	      version = parseInt(matches[0]);
+	    }
+	    if (_.isNumber(version)) {
+	      return version;
+	    }
+	  }
+	  return Number.MAX_VALUE;
 	};
 	
 	Utils.devicePixelRatio = function() {
@@ -13104,28 +13151,28 @@
 	  return result;
 	};
 	
+	__domCompleteState = "interactive";
+	
 	__domComplete = [];
 	
 	__domReady = false;
 	
 	if (typeof document !== "undefined" && document !== null) {
-	  document.onreadystatechange = (function(_this) {
-	    return function(event) {
-	      var f, results;
-	      if (document.readyState === "complete") {
-	        __domReady = true;
-	        results = [];
-	        while (__domComplete.length) {
-	          results.push(f = __domComplete.shift()());
-	        }
-	        return results;
+	  document.onreadystatechange = function(event) {
+	    var f, results;
+	    if (document.readyState === __domCompleteState) {
+	      __domReady = true;
+	      results = [];
+	      while (__domComplete.length) {
+	        results.push(f = __domComplete.shift()());
 	      }
-	    };
-	  })(this);
+	      return results;
+	    }
+	  };
 	}
 	
 	Utils.domComplete = function(f) {
-	  if (document.readyState === "complete") {
+	  if (__domReady) {
 	    return f();
 	  } else {
 	    return __domComplete.push(f);
@@ -13139,6 +13186,9 @@
 	Utils.domValidEvent = function(element, eventName) {
 	  if (!eventName) {
 	    return;
+	  }
+	  if (eventName === "touchstart" || eventName === "touchmove" || eventName === "touchend") {
+	    return true;
 	  }
 	  return typeof element["on" + (eventName.toLowerCase())] !== "undefined";
 	};
@@ -13232,6 +13282,29 @@
 	  return element.src = url;
 	};
 	
+	Utils.pointDivide = function(point, fraction) {
+	  return point = {
+	    x: point.x / fraction,
+	    y: point.y / fraction
+	  };
+	};
+	
+	Utils.pointAdd = function(pointA, pointB) {
+	  var point;
+	  return point = {
+	    x: pointA.x + pointB.x,
+	    y: pointA.y + pointB.y
+	  };
+	};
+	
+	Utils.pointSubtract = function(pointA, pointB) {
+	  var point;
+	  return point = {
+	    x: pointA.x - pointB.x,
+	    y: pointA.y - pointB.y
+	  };
+	};
+	
 	Utils.pointZero = function(args) {
 	  if (args == null) {
 	    args = {};
@@ -13268,12 +13341,19 @@
 	  };
 	};
 	
-	Utils.pointDistance = function(pointA, pointB) {
-	  var distance;
-	  return distance = {
-	    x: Math.abs(pointB.x - pointA.x),
-	    y: Math.abs(pointB.y - pointA.y)
+	Utils.pointDelta = function(pointA, pointB) {
+	  var delta;
+	  return delta = {
+	    x: pointB.x - pointA.x,
+	    y: pointB.y - pointA.y
 	  };
+	};
+	
+	Utils.pointDistance = function(pointA, pointB) {
+	  var a, b;
+	  a = pointA.x - pointB.x;
+	  b = pointA.y - pointB.y;
+	  return Math.sqrt((a * a) + (b * b));
 	};
 	
 	Utils.pointInvert = function(point) {
@@ -13302,6 +13382,18 @@
 	    return false;
 	  }
 	  return true;
+	};
+	
+	Utils.pointCenter = function(pointA, pointB) {
+	  var point;
+	  return point = {
+	    x: (pointA.x + pointB.x) / 2,
+	    y: (pointA.y + pointB.y) / 2
+	  };
+	};
+	
+	Utils.pointAngle = function(pointA, pointB) {
+	  return Math.atan2(pointB.y - pointA.y, pointB.x - pointA.x) * 180 / Math.PI;
 	};
 	
 	Utils.sizeZero = function(args) {
@@ -13482,6 +13574,57 @@
 	  };
 	};
 	
+	Utils.pointsFromFrame = function(frame) {
+	  var corner1, corner2, corner3, corner4, maxX, maxY, minX, minY;
+	  minX = Utils.frameGetMinX(frame);
+	  maxX = Utils.frameGetMaxX(frame);
+	  minY = Utils.frameGetMinY(frame);
+	  maxY = Utils.frameGetMaxY(frame);
+	  corner1 = {
+	    x: minX,
+	    y: minY
+	  };
+	  corner2 = {
+	    x: minX,
+	    y: maxY
+	  };
+	  corner3 = {
+	    x: maxX,
+	    y: maxY
+	  };
+	  corner4 = {
+	    x: maxX,
+	    y: minY
+	  };
+	  return [corner1, corner2, corner3, corner4];
+	};
+	
+	Utils.frameFromPoints = function(points) {
+	  var frame, maxX, maxY, minX, minY, xValues, yValues;
+	  xValues = _.pluck(points, "x");
+	  yValues = _.pluck(points, "y");
+	  minX = _.min(xValues);
+	  maxX = _.max(xValues);
+	  minY = _.min(yValues);
+	  maxY = _.max(yValues);
+	  return frame = {
+	    x: minX,
+	    y: minY,
+	    width: maxX - minX,
+	    height: maxY - minY
+	  };
+	};
+	
+	Utils.pixelAlignedFrame = function(frame) {
+	  var result;
+	  return result = {
+	    width: Math.round(frame.width + (frame.x % 1)),
+	    height: Math.round(frame.height + (frame.y % 1)),
+	    x: Math.round(frame.x),
+	    y: Math.round(frame.y)
+	  };
+	};
+	
 	Utils.frameMerge = function() {
 	  var frame, frames;
 	  frames = Utils.arrayFromArguments(arguments);
@@ -13504,6 +13647,14 @@
 	};
 	
 	Utils.frameInset = function(frame, inset) {
+	  if (_.isNumber(inset)) {
+	    inset = {
+	      top: inset,
+	      right: inset,
+	      bottom: inset,
+	      left: inset
+	    };
+	  }
 	  return frame = {
 	    x: frame.x + inset.left,
 	    y: frame.y + inset.top,
@@ -13522,7 +13673,7 @@
 	  }
 	  distance = function(frame) {
 	    var result;
-	    result = Utils.pointDistance(point, Utils.framePointForOrigin(frame, originX, originY));
+	    result = Utils.pointDelta(point, Utils.framePointForOrigin(frame, originX, originY));
 	    result = Utils.pointAbs(result);
 	    result = Utils.pointTotal(result);
 	    return result;
@@ -13553,35 +13704,218 @@
 	  return inside;
 	};
 	
-	Utils.pointAngle = function(p1, p2) {
-	  return Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+	Utils.frameCenterPoint = function(frame) {
+	  var point;
+	  return point = {
+	    x: Utils.frameGetMidX(frame),
+	    y: Utils.frameGetMidY(frame)
+	  };
 	};
 	
-	Utils.convertPoint = function(input, layerA, layerB, context) {
-	  var layer, len, len1, m, o, point, superLayersA, superLayersB;
-	  if (context == null) {
-	    context = false;
+	Utils.rotationNormalizer = function() {
+	  var lastValue;
+	  lastValue = null;
+	  return (function(_this) {
+	    return function(value) {
+	      var diff, maxDiff, nTimes;
+	      if (lastValue == null) {
+	        lastValue = value;
+	      }
+	      diff = lastValue - value;
+	      maxDiff = Math.abs(diff) + 180;
+	      nTimes = Math.floor(maxDiff / 360);
+	      if (diff < 180) {
+	        value -= nTimes * 360;
+	      }
+	      if (diff > 180) {
+	        value += nTimes * 360;
+	      }
+	      lastValue = value;
+	      return value;
+	    };
+	  })(this);
+	};
+	
+	Utils.convertPointToContext = function(point, layer, rootContext, includeLayer) {
+	  var ancestor, ancestors, len, o;
+	  if (point == null) {
+	    point = {};
+	  }
+	  if (rootContext == null) {
+	    rootContext = false;
+	  }
+	  if (includeLayer == null) {
+	    includeLayer = true;
+	  }
+	  point = _.defaults(point, {
+	    x: 0,
+	    y: 0,
+	    z: 0
+	  });
+	  ancestors = layer.ancestors(rootContext);
+	  if (includeLayer) {
+	    ancestors.unshift(layer);
+	  }
+	  for (o = 0, len = ancestors.length; o < len; o++) {
+	    ancestor = ancestors[o];
+	    if (ancestor.flat || ancestor.clip) {
+	      point.z = 0;
+	    }
+	    point = ancestor.matrix3d.point(point);
+	    if (!ancestor.parent) {
+	      point.z = 0;
+	    }
+	  }
+	  return point;
+	};
+	
+	Utils.convertFrameToContext = function(frame, layer, rootContext, includeLayer) {
+	  var convertedCorners, corners;
+	  if (frame == null) {
+	    frame = {};
+	  }
+	  if (rootContext == null) {
+	    rootContext = false;
+	  }
+	  if (includeLayer == null) {
+	    includeLayer = true;
+	  }
+	  frame = _.defaults(frame, {
+	    x: 0,
+	    y: 0,
+	    width: 100,
+	    height: 100
+	  });
+	  corners = Utils.pointsFromFrame(frame);
+	  convertedCorners = corners.map((function(_this) {
+	    return function(point) {
+	      return Utils.convertPointToContext(point, layer, rootContext, includeLayer);
+	    };
+	  })(this));
+	  return Utils.frameFromPoints(convertedCorners);
+	};
+	
+	Utils.convertPointFromContext = function(point, layer, rootContext, includeLayer) {
+	  var ancestor, ancestors, len, node, o, parent;
+	  if (point == null) {
+	    point = {};
+	  }
+	  if (rootContext == null) {
+	    rootContext = false;
+	  }
+	  if (includeLayer == null) {
+	    includeLayer = true;
+	  }
+	  point = _.defaults(point, {
+	    x: 0,
+	    y: 0,
+	    z: 0
+	  });
+	  if (rootContext && (typeof webkitConvertPointFromPageToNode !== "undefined" && webkitConvertPointFromPageToNode !== null)) {
+	    if (includeLayer) {
+	      node = layer._element;
+	    } else {
+	      parent = layer.parent || layer.context;
+	      node = parent._element;
+	    }
+	    return webkitConvertPointFromPageToNode(node, new WebKitPoint(point.x, point.y));
+	  }
+	  ancestors = layer.ancestors(rootContext);
+	  ancestors.reverse();
+	  if (includeLayer) {
+	    ancestors.push(layer);
+	  }
+	  for (o = 0, len = ancestors.length; o < len; o++) {
+	    ancestor = ancestors[o];
+	    point = ancestor.matrix3d.inverse().point(point);
+	  }
+	  return point;
+	};
+	
+	Utils.convertFrameFromContext = function(frame, layer, rootContext, includeLayer) {
+	  var convertedCorners, corners;
+	  if (frame == null) {
+	    frame = {};
+	  }
+	  if (rootContext == null) {
+	    rootContext = false;
+	  }
+	  if (includeLayer == null) {
+	    includeLayer = true;
+	  }
+	  frame = _.defaults(frame, {
+	    x: 0,
+	    y: 0,
+	    width: 100,
+	    height: 100
+	  });
+	  corners = Utils.pointsFromFrame(frame);
+	  convertedCorners = corners.map((function(_this) {
+	    return function(point) {
+	      return Utils.convertPointFromContext(point, layer, rootContext, includeLayer);
+	    };
+	  })(this));
+	  return Utils.frameFromPoints(convertedCorners);
+	};
+	
+	Utils.convertPoint = function(input, layerA, layerB, rootContext) {
+	  var node, point;
+	  if (rootContext == null) {
+	    rootContext = false;
 	  }
 	  point = _.defaults(input, {
 	    x: 0,
-	    y: 0
+	    y: 0,
+	    z: 0
 	  });
-	  superLayersA = (layerA != null ? layerA.superLayers(context) : void 0) || [];
-	  superLayersB = (layerB != null ? layerB.superLayers(context) : void 0) || [];
-	  if (layerB) {
-	    superLayersB.push(layerB);
+	  if (layerA) {
+	    point = Utils.convertPointToContext(point, layerA, rootContext);
 	  }
-	  for (m = 0, len = superLayersA.length; m < len; m++) {
-	    layer = superLayersA[m];
-	    point.x += layer.x;
-	    point.y += layer.y;
+	  if (layerB != null) {
+	    return Utils.convertPointFromContext(point, layerB, rootContext);
+	  } else if ((layerA != null) && rootContext && (typeof webkitConvertPointFromPageToNode !== "undefined" && webkitConvertPointFromPageToNode !== null)) {
+	    node = layerA.context._element;
+	    return webkitConvertPointFromPageToNode(node, new WebKitPoint(point.x, point.y));
+	  } else {
+	    return point;
 	  }
-	  for (o = 0, len1 = superLayersB.length; o < len1; o++) {
-	    layer = superLayersB[o];
-	    point.x -= layer.x;
-	    point.y -= layer.y;
+	};
+	
+	Utils.boundingFrame = function(layer, rootContext) {
+	  var boundingFrame, contextCornerPoints, cornerPoints, frame;
+	  if (rootContext == null) {
+	    rootContext = true;
 	  }
-	  return point;
+	  frame = {
+	    x: 0,
+	    y: 0,
+	    width: layer.width,
+	    height: layer.height
+	  };
+	  cornerPoints = Utils.pointsFromFrame(frame);
+	  contextCornerPoints = cornerPoints.map(function(point) {
+	    return Utils.convertPointToContext(point, layer, rootContext);
+	  });
+	  boundingFrame = Utils.frameFromPoints(contextCornerPoints);
+	  return Utils.pixelAlignedFrame(boundingFrame);
+	};
+	
+	Utils.perspectiveProjectionMatrix = function(element) {
+	  var m, p;
+	  p = element.perspective;
+	  m = new Matrix();
+	  if ((p != null) && p !== 0) {
+	    m.m34 = -1 / p;
+	  }
+	  return m;
+	};
+	
+	Utils.perspectiveMatrix = function(element) {
+	  var ox, oy, ppm;
+	  ox = element.perspectiveOriginX * element.width;
+	  oy = element.perspectiveOriginY * element.height;
+	  ppm = Utils.perspectiveProjectionMatrix(element);
+	  return new Matrix().translate(ox, oy).multiply(ppm).translate(-ox, -oy);
 	};
 	
 	Utils.globalLayers = function(importedLayers) {
@@ -13682,23 +14016,136 @@
 	
 	  ScreenClass.define("size", {
 	    get: function() {
-	      return {
-	        width: this.width,
-	        height: this.height
-	      };
+	      return Framer.CurrentContext.size;
 	    }
 	  });
 	
 	  ScreenClass.define("frame", {
 	    get: function() {
-	      return {
-	        x: 0,
-	        y: 0,
-	        width: this.width,
-	        height: this.height
-	      };
+	      return Framer.CurrentContext.frame;
 	    }
 	  });
+	
+	  ScreenClass.define("canvasFrame", {
+	    get: function() {
+	      return Framer.CurrentContext.canvasFrame;
+	    }
+	  });
+	
+	  ScreenClass.define("backgroundColor", {
+	    importable: false,
+	    exportable: false,
+	    get: function() {
+	      return Framer.Device.screen.backgroundColor;
+	    },
+	    set: function(value) {
+	      return Framer.Device.screen.backgroundColor = value;
+	    }
+	  });
+	
+	  ScreenClass.define("perspective", {
+	    importable: false,
+	    exportable: false,
+	    get: function() {
+	      return Framer.CurrentContext.perspective;
+	    },
+	    set: function(value) {
+	      return Framer.CurrentContext.perspective = value;
+	    }
+	  });
+	
+	  ScreenClass.define("perspectiveOriginX", {
+	    importable: false,
+	    exportable: false,
+	    get: function() {
+	      return Framer.CurrentContext.perspectiveOriginX;
+	    },
+	    set: function(value) {
+	      return Framer.CurrentContext.perspectiveOriginX = value;
+	    }
+	  });
+	
+	  ScreenClass.define("perspectiveOriginY", {
+	    importable: false,
+	    exportable: false,
+	    get: function() {
+	      return Framer.CurrentContext.perspectiveOriginY;
+	    },
+	    set: function(value) {
+	      return Framer.CurrentContext.perspectiveOriginY = value;
+	    }
+	  });
+	
+	  ScreenClass.prototype.toInspect = function() {
+	    var round;
+	    round = function(value) {
+	      if (parseInt(value) === value) {
+	        return parseInt(value);
+	      }
+	      return Utils.round(value, 1);
+	    };
+	    return "<Screen " + (round(this.width)) + "x" + (round(this.height)) + ">";
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipe = function(cb) {
+	    return this.on(Events.EdgeSwipe, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeStart = function(cb) {
+	    return this.on(Events.EdgeSwipeStart, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeEnd = function(cb) {
+	    return this.on(Events.EdgeSwipeEnd, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeTop = function(cb) {
+	    return this.on(Events.EdgeSwipeTop, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeTopStart = function(cb) {
+	    return this.on(Events.EdgeSwipeTopStart, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeTopEnd = function(cb) {
+	    return this.on(Events.EdgeSwipeTopEnd, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeRight = function(cb) {
+	    return this.on(Events.EdgeSwipeRight, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeRightStart = function(cb) {
+	    return this.on(Events.EdgeSwipeRightStart, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeRightEnd = function(cb) {
+	    return this.on(Events.EdgeSwipeRightEnd, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeBottom = function(cb) {
+	    return this.on(Events.EdgeSwipeBottom, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeBottomStart = function(cb) {
+	    return this.on(Events.EdgeSwipeBottomStart, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeBottomEnd = function(cb) {
+	    return this.on(Events.EdgeSwipeBottomEnd, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeLeft = function(cb) {
+	    return this.on(Events.EdgeSwipeLeft, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeLeftStart = function(cb) {
+	    return this.on(Events.EdgeSwipeLeftStart, cb);
+	  };
+	
+	  ScreenClass.prototype.onEdgeSwipeLeftEnd = function(cb) {
+	    return this.on(Events.EdgeSwipeLeftEnd, cb);
+	  };
 	
 	  return ScreenClass;
 	
@@ -13979,6 +14426,8 @@
 
 	'use strict';
 	
+	var has = Object.prototype.hasOwnProperty;
+	
 	//
 	// We store our EE objects in a plain object whose properties are event names.
 	// If `Object.create(null)` is not supported we prefix the event names with a
@@ -13994,7 +14443,7 @@
 	 *
 	 * @param {Function} fn Event handler to be called.
 	 * @param {Mixed} context Context for function execution.
-	 * @param {Boolean} once Only emit once
+	 * @param {Boolean} [once=false] Only emit once
 	 * @api private
 	 */
 	function EE(fn, context, once) {
@@ -14013,12 +14462,37 @@
 	function EventEmitter() { /* Nothing to set */ }
 	
 	/**
-	 * Holds the assigned EventEmitters by name.
+	 * Hold the assigned EventEmitters by name.
 	 *
 	 * @type {Object}
 	 * @private
 	 */
 	EventEmitter.prototype._events = undefined;
+	
+	/**
+	 * Return an array listing the events for which the emitter has registered
+	 * listeners.
+	 *
+	 * @returns {Array}
+	 * @api public
+	 */
+	EventEmitter.prototype.eventNames = function eventNames() {
+	  var events = this._events
+	    , names = []
+	    , name;
+	
+	  if (!events) return names;
+	
+	  for (name in events) {
+	    if (has.call(events, name)) names.push(prefix ? name.slice(1) : name);
+	  }
+	
+	  if (Object.getOwnPropertySymbols) {
+	    return names.concat(Object.getOwnPropertySymbols(events));
+	  }
+	
+	  return names;
+	};
 	
 	/**
 	 * Return a list of assigned event listeners.
@@ -14105,8 +14579,8 @@
 	 * Register a new EventListener for the given event.
 	 *
 	 * @param {String} event Name of the event.
-	 * @param {Functon} fn Callback function.
-	 * @param {Mixed} context The context of the function.
+	 * @param {Function} fn Callback function.
+	 * @param {Mixed} [context=this] The context of the function.
 	 * @api public
 	 */
 	EventEmitter.prototype.on = function on(event, fn, context) {
@@ -14130,7 +14604,7 @@
 	 *
 	 * @param {String} event Name of the event.
 	 * @param {Function} fn Callback function.
-	 * @param {Mixed} context The context of the function.
+	 * @param {Mixed} [context=this] The context of the function.
 	 * @api public
 	 */
 	EventEmitter.prototype.once = function once(event, fn, context) {
@@ -14243,6 +14717,45 @@
 
 /***/ },
 /* 9 */
+/***/ function(module, exports) {
+
+	WebKitCSSMatrix.prototype.skew = function(skew) {
+	  var m, rad, value;
+	  if (!skew) {
+	    return this;
+	  }
+	  rad = skew * Math.PI / 180;
+	  value = Math.tan(rad);
+	  m = new WebKitCSSMatrix();
+	  m.m12 = value;
+	  m.m21 = value;
+	  return this.multiply(m);
+	};
+	
+	WebKitCSSMatrix.prototype.point = function(point) {
+	  var ref, w, x, y, z;
+	  if (point == null) {
+	    point = {};
+	  }
+	  ref = _.defaults(point, {
+	    x: 0,
+	    y: 0,
+	    z: 0
+	  }), x = ref.x, y = ref.y, z = ref.z;
+	  w = this.m14 * x + this.m24 * y + this.m34 * z + this.m44;
+	  w = w || 1;
+	  return point = {
+	    x: (this.m11 * x + this.m21 * y + this.m31 * z + this.m41) / w,
+	    y: (this.m12 * x + this.m22 * y + this.m32 * z + this.m42) / w,
+	    z: (this.m13 * x + this.m23 * y + this.m33 * z + this.m43) / w
+	  };
+	};
+	
+	exports.Matrix = WebKitCSSMatrix;
+
+
+/***/ },
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var BaseClass, ColorModel, ColorType, bound01, convertToPercentage, correctAlpha, cssNames, hslToRgb, inputData, isNumeric, isOnePointZero, isPercentage, libhusl, matchers, numberFromString, pad2, percentToFraction, rgbToHex, rgbToHsl, rgbToRgb, rgbaFromHusl, stringToObject,
@@ -14252,7 +14765,7 @@
 	
 	BaseClass = __webpack_require__(6).BaseClass;
 	
-	libhusl = __webpack_require__(10);
+	libhusl = __webpack_require__(11);
 	
 	ColorType = {
 	  RGB: "rgb",
@@ -14268,6 +14781,9 @@
 	    var color, input;
 	    this.color = color1;
 	    this.toInspect = bind(this.toInspect, this);
+	    if (this.color === "") {
+	      this.color = null;
+	    }
 	    color = this.color;
 	    if (Color.isColorObject(color)) {
 	      return color;
@@ -14635,7 +15151,19 @@
 	    }
 	    colorA = new Color(colorA);
 	    colorB = new Color(colorB);
-	    return colorA.r === colorB.r && colorA.g === colorB.g && colorA.b === colorB.b && colorA.a === colorB.a;
+	    if (colorA.r !== colorB.r) {
+	      return false;
+	    }
+	    if (colorA.g !== colorB.g) {
+	      return false;
+	    }
+	    if (colorA.b !== colorB.b) {
+	      return false;
+	    }
+	    if (colorA.a !== colorB.a) {
+	      return false;
+	    }
+	    return true;
 	  };
 	
 	  Color.rgbToHsl = function(a, b, c) {
@@ -14713,6 +15241,14 @@
 	  } else {
 	    if (typeof color === "string") {
 	      color = stringToObject(color);
+	      if (!color) {
+	        color = {
+	          r: 0,
+	          g: 0,
+	          b: 0,
+	          a: 0
+	        };
+	      }
 	      if (color.hasOwnProperty("type")) {
 	        type = color.type;
 	      }
@@ -14864,7 +15400,10 @@
 	
 	correctAlpha = function(a) {
 	  a = parseFloat(a);
-	  if (isNaN(a) || a < 0 || a > 1) {
+	  if (a < 0) {
+	    a = 0;
+	  }
+	  if (isNaN(a) || a > 1) {
 	    a = 1;
 	  }
 	  return a;
@@ -15154,7 +15693,7 @@
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module) {// Generated by CoffeeScript 1.9.3
@@ -15534,7 +16073,7 @@
 	    jQuery.husl = root;
 	  }
 	
-	  if ((typeof requirejs !== "undefined" && requirejs !== null) && ("function" !== "undefined" && __webpack_require__(11) !== null)) {
+	  if ((typeof requirejs !== "undefined" && requirejs !== null) && ("function" !== "undefined" && __webpack_require__(12) !== null)) {
 	    !(__WEBPACK_AMD_DEFINE_FACTORY__ = (root), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	  }
 	
@@ -15543,17 +16082,17 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)(module)))
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	module.exports = function() { throw new Error("define cannot be used indirect"); };
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Animation, BaseClass, Color, Config, Defaults, EventEmitter, Events, LayerDraggable, LayerStates, LayerStyle, NoCacheDateKey, Utils, _, layerProperty, layerValueTypeError,
+	var Animation, BaseClass, Color, Config, Defaults, EventEmitter, Events, Gestures, LayerDraggable, LayerPinchable, LayerStates, LayerStyle, Matrix, NoCacheDateKey, Utils, _, layerProperty, layerPropertyPointTransformer, layerValueTypeError,
 	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty,
@@ -15564,25 +16103,31 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Config = __webpack_require__(13).Config;
+	Config = __webpack_require__(14).Config;
 	
-	Events = __webpack_require__(14).Events;
+	Events = __webpack_require__(15).Events;
 	
-	Defaults = __webpack_require__(15).Defaults;
+	Defaults = __webpack_require__(17).Defaults;
 	
 	BaseClass = __webpack_require__(6).BaseClass;
 	
 	EventEmitter = __webpack_require__(7).EventEmitter;
 	
-	Color = __webpack_require__(9).Color;
+	Color = __webpack_require__(10).Color;
 	
-	Animation = __webpack_require__(16).Animation;
+	Matrix = __webpack_require__(9).Matrix;
 	
-	LayerStyle = __webpack_require__(23).LayerStyle;
+	Animation = __webpack_require__(18).Animation;
 	
-	LayerStates = __webpack_require__(24).LayerStates;
+	LayerStyle = __webpack_require__(25).LayerStyle;
 	
-	LayerDraggable = __webpack_require__(25).LayerDraggable;
+	LayerStates = __webpack_require__(26).LayerStates;
+	
+	LayerDraggable = __webpack_require__(27).LayerDraggable;
+	
+	LayerPinchable = __webpack_require__(34).LayerPinchable;
+	
+	Gestures = __webpack_require__(16).Gestures;
 	
 	NoCacheDateKey = Date.now();
 	
@@ -15604,8 +16149,8 @@
 	      return fallback;
 	    },
 	    set: function(value) {
-	      if (transformer && (value || value === null)) {
-	        value = transformer(value);
+	      if (transformer) {
+	        value = transformer(value, this, name);
 	      }
 	      if (value === this._properties[name]) {
 	        return;
@@ -15614,7 +16159,9 @@
 	        layerValueTypeError(name, value);
 	      }
 	      this._properties[name] = value;
-	      this._element.style[cssProperty] = LayerStyle[cssProperty](this);
+	      if (cssProperty !== null) {
+	        this._element.style[cssProperty] = LayerStyle[cssProperty](this);
+	      }
 	      if (typeof set === "function") {
 	        set(this, value);
 	      }
@@ -15636,6 +16183,13 @@
 	  return result = _.extend(result, options);
 	};
 	
+	layerPropertyPointTransformer = function(value, layer, property) {
+	  if (_.isFunction(value)) {
+	    value = value(layer, property);
+	  }
+	  return value;
+	};
+	
 	exports.Layer = (function(superClass) {
 	  extend(Layer, superClass);
 	
@@ -15647,9 +16201,11 @@
 	    this.once = bind(this.once, this);
 	    this._properties = {};
 	    this._style = {};
-	    this._subLayers = [];
+	    this._children = [];
 	    this._prefer2d = false;
 	    this._alwaysUseImageCache = false;
+	    this._cancelClickEventInDragSession = true;
+	    this._cancelClickEventInDragSessionVelocity = 0.1;
 	    this._createElement();
 	    if (options.hasOwnProperty("frame")) {
 	      options = _.extend(options, options.frame);
@@ -15658,15 +16214,24 @@
 	    Layer.__super__.constructor.call(this, options);
 	    this._context.addLayer(this);
 	    this._id = this._context.layerCounter;
-	    if (!options.superLayer) {
+	    if (!options.parent && options.hasOwnProperty("superLayer")) {
+	      options.parent = options.superLayer;
+	    }
+	    if (!options.parent) {
 	      if (!options.shadow) {
 	        this._insertElement();
 	      }
 	    } else {
-	      this.superLayer = options.superLayer;
+	      this.parent = options.parent;
 	    }
 	    if (options.hasOwnProperty("index")) {
 	      this.index = options.index;
+	    }
+	    if (options.hasOwnProperty("x")) {
+	      this.x = options.x;
+	    }
+	    if (options.hasOwnProperty("y")) {
+	      this.y = options.y;
 	    }
 	    this._context.emit("layer:create", this);
 	  }
@@ -15692,7 +16257,7 @@
 	    exportable: false
 	  }));
 	
-	  Layer.define("clip", layerProperty(Layer, "clip", "overflow", true, _.isBoolean));
+	  Layer.define("clip", layerProperty(Layer, "clip", "overflow", false, _.isBoolean));
 	
 	  Layer.define("scrollHorizontal", layerProperty(Layer, "scrollHorizontal", "overflowX", false, _.isBoolean, null, {}, function(layer, value) {
 	    if (value === true) {
@@ -15717,9 +16282,9 @@
 	
 	  Layer.define("ignoreEvents", layerProperty(Layer, "ignoreEvents", "pointerEvents", true, _.isBoolean));
 	
-	  Layer.define("x", layerProperty(Layer, "x", "webkitTransform", 0, _.isNumber));
+	  Layer.define("x", layerProperty(Layer, "x", "webkitTransform", 0, _.isNumber, layerPropertyPointTransformer));
 	
-	  Layer.define("y", layerProperty(Layer, "y", "webkitTransform", 0, _.isNumber));
+	  Layer.define("y", layerProperty(Layer, "y", "webkitTransform", 0, _.isNumber, layerPropertyPointTransformer));
 	
 	  Layer.define("z", layerProperty(Layer, "z", "webkitTransform", 0, _.isNumber));
 	
@@ -15741,7 +16306,13 @@
 	
 	  Layer.define("originY", layerProperty(Layer, "originY", "webkitTransformOrigin", 0.5, _.isNumber));
 	
+	  Layer.define("originZ", layerProperty(Layer, "originZ", null, 0, _.isNumber));
+	
 	  Layer.define("perspective", layerProperty(Layer, "perspective", "webkitPerspective", 0, _.isNumber));
+	
+	  Layer.define("perspectiveOriginX", layerProperty(Layer, "perspectiveOriginX", "webkitPerspectiveOrigin", 0.5, _.isNumber));
+	
+	  Layer.define("perspectiveOriginY", layerProperty(Layer, "perspectiveOriginY", "webkitPerspectiveOrigin", 0.5, _.isNumber));
 	
 	  Layer.define("rotationX", layerProperty(Layer, "rotationX", "webkitTransform", 0, _.isNumber));
 	
@@ -15794,6 +16365,10 @@
 	
 	  Layer.define("force2d", layerProperty(Layer, "force2d", "webkitTransform", false, _.isBoolean));
 	
+	  Layer.define("flat", layerProperty(Layer, "flat", "webkitTransformStyle", false, _.isBoolean));
+	
+	  Layer.define("backfaceVisible", layerProperty(Layer, "backfaceVisible", "webkitBackfaceVisibility", true, _.isBoolean));
+	
 	  Layer.define("name", {
 	    "default": "",
 	    get: function() {
@@ -15802,6 +16377,36 @@
 	    set: function(value) {
 	      this._setPropertyValue("name", value);
 	      return this._element.setAttribute("name", value);
+	    }
+	  });
+	
+	  Layer.define("matrix", {
+	    get: function() {
+	      if (this.force2d) {
+	        return this._matrix2d;
+	      }
+	      return new Matrix().translate(this.x, this.y, this.z).scale(this.scale).scale(this.scaleX, this.scaleY, this.scaleZ).skew(this.skew).skewX(this.skewX).skewY(this.skewY).translate(0, 0, this.originZ).rotate(this.rotationX, 0, 0).rotate(0, this.rotationY, 0).rotate(0, 0, this.rotationZ).translate(0, 0, -this.originZ);
+	    }
+	  });
+	
+	  Layer.define("_matrix2d", {
+	    get: function() {
+	      return new Matrix().translate(this.x, this.y).scale(this.scale).skewX(this.skew).skewY(this.skew).rotate(0, 0, this.rotationZ);
+	    }
+	  });
+	
+	  Layer.define("transformMatrix", {
+	    get: function() {
+	      return new Matrix().translate(this.originX * this.width, this.originY * this.height).multiply(this.matrix).translate(-this.originX * this.width, -this.originY * this.height);
+	    }
+	  });
+	
+	  Layer.define("matrix3d", {
+	    get: function() {
+	      var parent, ppm;
+	      parent = this.superLayer || this.context;
+	      ppm = Utils.perspectiveMatrix(parent);
+	      return new Matrix().multiply(ppm).multiply(this.transformMatrix);
 	    }
 	  });
 	
@@ -15842,6 +16447,12 @@
 	      if (!point) {
 	        return;
 	      }
+	      if (_.isNumber(point)) {
+	        point = {
+	          x: point,
+	          y: point
+	        };
+	      }
 	      ref = ["x", "y"];
 	      results = [];
 	      for (i = 0, len = ref.length; i < len; i++) {
@@ -15864,6 +16475,12 @@
 	      var i, k, len, ref, results;
 	      if (!size) {
 	        return;
+	      }
+	      if (_.isNumber(size)) {
+	        size = {
+	          width: size,
+	          height: size
+	        };
 	      }
 	      ref = ["width", "height"];
 	      results = [];
@@ -15968,24 +16585,30 @@
 	    }
 	  });
 	
-	  Layer.prototype.convertPoint = function(point) {
-	    return Utils.convertPoint(point, null, this);
+	  Layer.prototype.convertPointFromScreen = function(point) {
+	    return Utils.convertPointFromContext(point, this, false);
+	  };
+	
+	  Layer.prototype.convertPointFromCanvas = function(point) {
+	    return Utils.convertPointFromContext(point, this, true);
+	  };
+	
+	  Layer.prototype.convertPointToScreen = function(point) {
+	    return Utils.convertPointToContext(point, this, false);
+	  };
+	
+	  Layer.prototype.convertPointToCanvas = function(point) {
+	    return Utils.convertPointToContext(point, this, true);
 	  };
 	
 	  Layer.define("canvasFrame", {
 	    importable: true,
 	    exportable: false,
 	    get: function() {
-	      var context;
-	      return Utils.convertPoint(this.frame, this, null, context = true);
+	      return Utils.boundingFrame(this);
 	    },
 	    set: function(frame) {
-	      var context;
-	      if (!this.superLayer) {
-	        return this.frame = frame;
-	      } else {
-	        return this.frame = Utils.convertPoint(frame, null, this.superLayer, context = true);
-	      }
+	      return this.frame = Utils.convertFrameFromContext(frame, this, true, false);
 	    }
 	  });
 	
@@ -15993,21 +16616,15 @@
 	    importable: true,
 	    exportable: false,
 	    get: function() {
-	      var context;
-	      return Utils.convertPoint(this.frame, this, null, context = false);
+	      return Utils.boundingFrame(this, false);
 	    },
 	    set: function(frame) {
-	      var context;
-	      if (!this.superLayer) {
-	        return this.frame = frame;
-	      } else {
-	        return this.frame = Utils.convertPoint(frame, null, this.superLayer, context = false);
-	      }
+	      return this.frame = Utils.convertFrameFromContext(frame, this, false, false);
 	    }
 	  });
 	
 	  Layer.prototype.contentFrame = function() {
-	    if (!this.subLayers.length) {
+	    if (!this.children.length) {
 	      return {
 	        x: 0,
 	        y: 0,
@@ -16015,15 +16632,15 @@
 	        height: 0
 	      };
 	    }
-	    return Utils.frameMerge(_.pluck(this.subLayers, "frame"));
+	    return Utils.frameMerge(_.pluck(this.children, "frame"));
 	  };
 	
 	  Layer.prototype.centerFrame = function() {
 	    var frame;
-	    if (this.superLayer) {
+	    if (this.parent) {
 	      frame = this.frame;
-	      Utils.frameSetMidX(frame, parseInt(this.superLayer.width / 2.0));
-	      Utils.frameSetMidY(frame, parseInt(this.superLayer.height / 2.0));
+	      Utils.frameSetMidX(frame, parseInt((this.parent.width / 2.0) - this.superLayer.borderWidth));
+	      Utils.frameSetMidY(frame, parseInt((this.parent.height / 2.0) - this.superLayer.borderWidth));
 	      return frame;
 	    } else {
 	      frame = this.frame;
@@ -16060,65 +16677,65 @@
 	  };
 	
 	  Layer.prototype.canvasScaleX = function() {
-	    var context, i, len, ref, scale, superLayer;
+	    var context, i, len, parent, ref, scale;
 	    scale = this.scale * this.scaleX;
-	    ref = this.superLayers(context = true);
+	    ref = this.ancestors(context = true);
 	    for (i = 0, len = ref.length; i < len; i++) {
-	      superLayer = ref[i];
-	      scale = scale * superLayer.scale * superLayer.scaleX;
+	      parent = ref[i];
+	      scale = scale * parent.scale * parent.scaleX;
 	    }
 	    return scale;
 	  };
 	
 	  Layer.prototype.canvasScaleY = function() {
-	    var context, i, len, ref, scale, superLayer;
+	    var context, i, len, parent, ref, scale;
 	    scale = this.scale * this.scaleY;
-	    ref = this.superLayers(context = true);
+	    ref = this.ancestors(context = true);
 	    for (i = 0, len = ref.length; i < len; i++) {
-	      superLayer = ref[i];
-	      scale = scale * superLayer.scale * superLayer.scaleY;
+	      parent = ref[i];
+	      scale = scale * parent.scale * parent.scaleY;
 	    }
 	    return scale;
 	  };
 	
 	  Layer.prototype.screenScaleX = function() {
-	    var context, i, len, ref, scale, superLayer;
+	    var context, i, len, parent, ref, scale;
 	    scale = this.scale * this.scaleX;
-	    ref = this.superLayers(context = false);
+	    ref = this.ancestors(context = false);
 	    for (i = 0, len = ref.length; i < len; i++) {
-	      superLayer = ref[i];
-	      scale = scale * superLayer.scale * superLayer.scaleX;
+	      parent = ref[i];
+	      scale = scale * parent.scale * parent.scaleX;
 	    }
 	    return scale;
 	  };
 	
 	  Layer.prototype.screenScaleY = function() {
-	    var context, i, len, ref, scale, superLayer;
+	    var context, i, len, parent, ref, scale;
 	    scale = this.scale * this.scaleY;
-	    ref = this.superLayers(context = false);
+	    ref = this.ancestors(context = false);
 	    for (i = 0, len = ref.length; i < len; i++) {
-	      superLayer = ref[i];
-	      scale = scale * superLayer.scale * superLayer.scaleY;
+	      parent = ref[i];
+	      scale = scale * parent.scale * parent.scaleY;
 	    }
 	    return scale;
 	  };
 	
 	  Layer.prototype.screenScaledFrame = function() {
-	    var context, factorX, factorY, frame, i, layerScaledFrame, layers, len, superLayer;
+	    var context, factorX, factorY, frame, i, layerScaledFrame, layers, len, parent;
 	    frame = {
 	      x: 0,
 	      y: 0,
 	      width: this.width * this.screenScaleX(),
 	      height: this.height * this.screenScaleY()
 	    };
-	    layers = this.superLayers(context = true);
+	    layers = this.ancestors(context = true);
 	    layers.push(this);
 	    layers.reverse();
 	    for (i = 0, len = layers.length; i < len; i++) {
-	      superLayer = layers[i];
-	      factorX = superLayer._superOrParentLayer() ? superLayer._superOrParentLayer().screenScaleX() : 1;
-	      factorY = superLayer._superOrParentLayer() ? superLayer._superOrParentLayer().screenScaleY() : 1;
-	      layerScaledFrame = superLayer.scaledFrame();
+	      parent = layers[i];
+	      factorX = parent._parentOrContext() ? parent._parentOrContext().screenScaleX() : 1;
+	      factorY = parent._parentOrContext() ? parent._parentOrContext().screenScaleY() : 1;
+	      layerScaledFrame = parent.scaledFrame();
 	      frame.x += layerScaledFrame.x * factorX;
 	      frame.y += layerScaledFrame.y * factorY;
 	    }
@@ -16204,8 +16821,8 @@
 	
 	  Layer.prototype.destroy = function() {
 	    var ref;
-	    if (this.superLayer) {
-	      this.superLayer._subLayers = _.without(this.superLayer._subLayers, this);
+	    if (this.parent) {
+	      this.parent._children = _.without(this.parent._children, this);
 	    }
 	    if ((ref = this._element.parentNode) != null) {
 	      ref.removeChild(this._element);
@@ -16216,13 +16833,13 @@
 	  };
 	
 	  Layer.prototype.copy = function() {
-	    var copiedSublayer, i, layer, len, ref, subLayer;
+	    var child, copiedChild, i, layer, len, ref;
 	    layer = this.copySingle();
-	    ref = this.subLayers;
+	    ref = this.children;
 	    for (i = 0, len = ref.length; i < len; i++) {
-	      subLayer = ref[i];
-	      copiedSublayer = subLayer.copy();
-	      copiedSublayer.superLayer = layer;
+	      child = ref[i];
+	      copiedChild = child.copy();
+	      copiedChild.parent = layer;
 	    }
 	    return layer;
 	  };
@@ -16239,7 +16856,7 @@
 	      return this._getPropertyValue("image");
 	    },
 	    set: function(value) {
-	      var currentValue, imageUrl, loader, ref, ref1;
+	      var currentValue, defaults, imageUrl, loader, ref;
 	      if (!(_.isString(value) || value === null)) {
 	        layerValueTypeError("image", value);
 	      }
@@ -16247,7 +16864,10 @@
 	      if (currentValue === value) {
 	        return this.emit("load");
 	      }
-	      this.backgroundColor = null;
+	      defaults = Defaults.getDefaults("Layer", {});
+	      if ((ref = this.backgroundColor) != null ? ref.isEqual(defaults.backgroundColor) : void 0) {
+	        this.backgroundColor = null;
+	      }
 	      this._setPropertyValue("image", value);
 	      if (value === null || value === "") {
 	        this.style["background-image"] = null;
@@ -16257,19 +16877,19 @@
 	      if (this._alwaysUseImageCache === false && Utils.isLocalAssetUrl(imageUrl)) {
 	        imageUrl += "?nocache=" + NoCacheDateKey;
 	      }
-	      if ((ref = this._eventListeners) != null ? ref.hasOwnProperty("load" || ((ref1 = this._eventListeners) != null ? ref1.hasOwnProperty("error") : void 0)) : void 0) {
+	      if (this._domEventManager.listeners(Events.ImageLoaded) || this._domEventManager.listeners(Events.ImageLoadError)) {
 	        loader = new Image();
 	        loader.name = imageUrl;
 	        loader.src = imageUrl;
 	        loader.onload = (function(_this) {
 	          return function() {
 	            _this.style["background-image"] = "url('" + imageUrl + "')";
-	            return _this.emit("load", loader);
+	            return _this.emit(Events.ImageLoaded, loader);
 	          };
 	        })(this);
 	        return loader.onerror = (function(_this) {
 	          return function() {
-	            return _this.emit("error", loader);
+	            return _this.emit(Events.ImageLoadError, loader);
 	          };
 	        })(this);
 	      } else {
@@ -16278,32 +16898,40 @@
 	    }
 	  });
 	
-	  Layer.define("superLayer", {
+	  Layer.define("parent", {
 	    enumerable: false,
 	    exportable: false,
 	    importable: true,
 	    get: function() {
-	      return this._superLayer || null;
+	      return this._parent || null;
 	    },
 	    set: function(layer) {
-	      if (layer === this._superLayer) {
+	      if (layer === this._parent) {
 	        return;
 	      }
 	      if (!layer instanceof Layer) {
-	        throw Error("Layer.superLayer needs to be a Layer object");
+	        throw Error("Layer.parent needs to be a Layer object");
 	      }
 	      Utils.domCompleteCancel(this.__insertElement);
-	      if (this._superLayer) {
-	        this._superLayer._subLayers = _.without(this._superLayer._subLayers, this);
-	        this._superLayer._element.removeChild(this._element);
-	        this._superLayer.emit("change:subLayers", {
+	      if (this._parent) {
+	        this._parent._children = _.without(this._parent._children, this);
+	        this._parent._element.removeChild(this._element);
+	        this._parent.emit("change:children", {
+	          added: [],
+	          removed: [this]
+	        });
+	        this._parent.emit("change:subLayers", {
 	          added: [],
 	          removed: [this]
 	        });
 	      }
 	      if (layer) {
 	        layer._element.appendChild(this._element);
-	        layer._subLayers.push(this);
+	        layer._children.push(this);
+	        layer.emit("change:children", {
+	          added: [this],
+	          removed: []
+	        });
 	        layer.emit("change:subLayers", {
 	          added: [this],
 	          removed: []
@@ -16311,9 +16939,164 @@
 	      } else {
 	        this._insertElement();
 	      }
-	      this._superLayer = layer;
+	      this._parent = layer;
 	      this.bringToFront();
+	      this.emit("change:parent");
 	      return this.emit("change:superLayer");
+	    }
+	  });
+	
+	  Layer.define("children", {
+	    enumerable: false,
+	    exportable: false,
+	    importable: false,
+	    get: function() {
+	      return _.clone(this._children);
+	    }
+	  });
+	
+	  Layer.define("siblings", {
+	    enumerable: false,
+	    exportable: false,
+	    importable: false,
+	    get: function() {
+	      if (this.parent === null) {
+	        return _.filter(this._context.getLayers(), (function(_this) {
+	          return function(layer) {
+	            return layer !== _this && layer.parent === null;
+	          };
+	        })(this));
+	      }
+	      return _.without(this.parent.children, this);
+	    }
+	  });
+	
+	  Layer.define("descendants", {
+	    enumerable: false,
+	    exportable: false,
+	    importable: false,
+	    get: function() {
+	      var f, result;
+	      result = [];
+	      f = function(layer) {
+	        result.push(layer);
+	        return layer.children.map(f);
+	      };
+	      this.children.map(f);
+	      return result;
+	    }
+	  });
+	
+	  Layer.prototype.addChild = function(layer) {
+	    return layer.parent = this;
+	  };
+	
+	  Layer.prototype.removeChild = function(layer) {
+	    if (indexOf.call(this.children, layer) < 0) {
+	      return;
+	    }
+	    return layer.parent = null;
+	  };
+	
+	  Layer.prototype.childrenWithName = function(name) {
+	    return _.filter(this.children, function(layer) {
+	      return layer.name === name;
+	    });
+	  };
+	
+	  Layer.prototype.siblingsWithName = function(name) {
+	    return _.filter(this.siblingLayers, function(layer) {
+	      return layer.name === name;
+	    });
+	  };
+	
+	  Layer.prototype.ancestors = function(context) {
+	    var currentLayer, parents;
+	    if (context == null) {
+	      context = false;
+	    }
+	    parents = [];
+	    currentLayer = this;
+	    if (context === false) {
+	      while (currentLayer.parent) {
+	        parents.push(currentLayer.parent);
+	        currentLayer = currentLayer.parent;
+	      }
+	    } else {
+	      while (currentLayer._parentOrContext()) {
+	        parents.push(currentLayer._parentOrContext());
+	        currentLayer = currentLayer._parentOrContext();
+	      }
+	    }
+	    return parents;
+	  };
+	
+	  Layer.prototype.childrenAbove = function(point, originX, originY) {
+	    if (originX == null) {
+	      originX = 0;
+	    }
+	    if (originY == null) {
+	      originY = 0;
+	    }
+	    return _.filter(this.children, function(layer) {
+	      return Utils.framePointForOrigin(layer.frame, originX, originY).y < point.y;
+	    });
+	  };
+	
+	  Layer.prototype.childrenBelow = function(point, originX, originY) {
+	    if (originX == null) {
+	      originX = 0;
+	    }
+	    if (originY == null) {
+	      originY = 0;
+	    }
+	    return _.filter(this.children, function(layer) {
+	      return Utils.framePointForOrigin(layer.frame, originX, originY).y > point.y;
+	    });
+	  };
+	
+	  Layer.prototype.childrenLeft = function(point, originX, originY) {
+	    if (originX == null) {
+	      originX = 0;
+	    }
+	    if (originY == null) {
+	      originY = 0;
+	    }
+	    return _.filter(this.children, function(layer) {
+	      return Utils.framePointForOrigin(layer.frame, originX, originY).x < point.x;
+	    });
+	  };
+	
+	  Layer.prototype.childrenRight = function(point, originX, originY) {
+	    if (originX == null) {
+	      originX = 0;
+	    }
+	    if (originY == null) {
+	      originY = 0;
+	    }
+	    return _.filter(this.children, function(layer) {
+	      return Utils.framePointForOrigin(layer.frame, originX, originY).x > point.x;
+	    });
+	  };
+	
+	  Layer.prototype._parentOrContext = function() {
+	    if (this.parent) {
+	      return this.parent;
+	    }
+	    if (this._context._parent) {
+	      return this._context._parent;
+	    }
+	  };
+	
+	  Layer.define("superLayer", {
+	    enumerable: false,
+	    exportable: false,
+	    importable: false,
+	    get: function() {
+	      return this.parent;
+	    },
+	    set: function(value) {
+	      return this.parent = value;
 	    }
 	  });
 	
@@ -16322,7 +17105,7 @@
 	    exportable: false,
 	    importable: false,
 	    get: function() {
-	      return _.clone(this._subLayers);
+	      return this.children;
 	    }
 	  });
 	
@@ -16331,68 +17114,31 @@
 	    exportable: false,
 	    importable: false,
 	    get: function() {
-	      if (this.superLayer === null) {
-	        return _.filter(this._context.getLayers(), (function(_this) {
-	          return function(layer) {
-	            return layer !== _this && layer.superLayer === null;
-	          };
-	        })(this));
-	      }
-	      return _.without(this.superLayer.subLayers, this);
+	      return this.siblings;
 	    }
 	  });
 	
-	  Layer.prototype.addSubLayer = function(layer) {
-	    return layer.superLayer = this;
-	  };
-	
-	  Layer.prototype.removeSubLayer = function(layer) {
-	    if (indexOf.call(this.subLayers, layer) < 0) {
-	      return;
-	    }
-	    return layer.superLayer = null;
-	  };
-	
-	  Layer.prototype.subLayersByName = function(name) {
-	    return _.filter(this.subLayers, function(layer) {
-	      return layer.name === name;
-	    });
-	  };
-	
-	  Layer.prototype.siblingLayersByName = function(name) {
-	    return _.filter(this.siblingLayers, function(layer) {
-	      return layer.name === name;
-	    });
-	  };
-	
 	  Layer.prototype.superLayers = function(context) {
-	    var currentLayer, superLayers;
 	    if (context == null) {
 	      context = false;
 	    }
-	    superLayers = [];
-	    currentLayer = this;
-	    if (context === false) {
-	      while (currentLayer.superLayer) {
-	        superLayers.push(currentLayer.superLayer);
-	        currentLayer = currentLayer.superLayer;
-	      }
-	    } else {
-	      while (currentLayer._superOrParentLayer()) {
-	        superLayers.push(currentLayer._superOrParentLayer());
-	        currentLayer = currentLayer._superOrParentLayer();
-	      }
-	    }
-	    return superLayers;
+	    return this.ancestors(context);
 	  };
 	
-	  Layer.prototype._superOrParentLayer = function() {
-	    if (this.superLayer) {
-	      return this.superLayer;
-	    }
-	    if (this._context._parent) {
-	      return this._context._parent;
-	    }
+	  Layer.prototype.addSubLayer = function(layer) {
+	    return this.addChild(layer);
+	  };
+	
+	  Layer.prototype.removeSubLayer = function(layer) {
+	    return this.removeChild(layer);
+	  };
+	
+	  Layer.prototype.subLayersByName = function(name) {
+	    return this.childrenWithName(name);
+	  };
+	
+	  Layer.prototype.siblingLayersByName = function(name) {
+	    return this.siblingsWithName(name);
 	  };
 	
 	  Layer.prototype.subLayersAbove = function(point, originX, originY) {
@@ -16402,9 +17148,7 @@
 	    if (originY == null) {
 	      originY = 0;
 	    }
-	    return _.filter(this.subLayers, function(layer) {
-	      return Utils.framePointForOrigin(layer.frame, originX, originY).y < point.y;
-	    });
+	    return this.childrenAbove(point, originX, originY);
 	  };
 	
 	  Layer.prototype.subLayersBelow = function(point, originX, originY) {
@@ -16414,9 +17158,7 @@
 	    if (originY == null) {
 	      originY = 0;
 	    }
-	    return _.filter(this.subLayers, function(layer) {
-	      return Utils.framePointForOrigin(layer.frame, originX, originY).y > point.y;
-	    });
+	    return this.childrenBelow(point, originX, originY);
 	  };
 	
 	  Layer.prototype.subLayersLeft = function(point, originX, originY) {
@@ -16426,9 +17168,7 @@
 	    if (originY == null) {
 	      originY = 0;
 	    }
-	    return _.filter(this.subLayers, function(layer) {
-	      return Utils.framePointForOrigin(layer.frame, originX, originY).x < point.x;
-	    });
+	    return this.childrenLeft(point, originX, originY);
 	  };
 	
 	  Layer.prototype.subLayersRight = function(point, originX, originY) {
@@ -16438,9 +17178,11 @@
 	    if (originY == null) {
 	      originY = 0;
 	    }
-	    return _.filter(this.subLayers, function(layer) {
-	      return Utils.framePointForOrigin(layer.frame, originX, originY).x > point.x;
-	    });
+	    return this.childrenRight(point, originX, originY);
+	  };
+	
+	  Layer.prototype._superOrParentLayer = function() {
+	    return this._parentOrContext();
 	  };
 	
 	  Layer.prototype.animate = function(options) {
@@ -16559,6 +17301,19 @@
 	    }
 	  });
 	
+	  Layer.define("pinchable", {
+	    importable: false,
+	    exportable: false,
+	    get: function() {
+	      return this._pinchable != null ? this._pinchable : this._pinchable = new LayerPinchable(this);
+	    },
+	    set: function(value) {
+	      if (_.isBoolean(value)) {
+	        return this.pinchable.enabled = value;
+	      }
+	    }
+	  });
+	
 	  Layer.define("scrollFrame", {
 	    importable: false,
 	    get: function() {
@@ -16607,9 +17362,22 @@
 	  });
 	
 	  Layer.prototype.emit = function() {
-	    var args;
-	    args = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-	    return Layer.__super__.emit.apply(this, slice.call(args).concat([this]));
+	    var args, eventName, ref, velocity;
+	    eventName = arguments[0], args = 2 <= arguments.length ? slice.call(arguments, 1) : [];
+	    if (this._cancelClickEventInDragSession) {
+	      if (eventName === Events.Click || eventName === Events.Tap || eventName === Events.TapStart || eventName === Events.TapEnd || eventName === Events.LongPress || eventName === Events.LongPressStart || eventName === Events.LongPressEnd) {
+	        if (this._parentDraggableLayer()) {
+	          velocity = (ref = this._parentDraggableLayer()) != null ? ref.draggable.velocity : void 0;
+	          if (Math.abs(velocity.x) > this._cancelClickEventInDragSessionVelocity) {
+	            return;
+	          }
+	          if (Math.abs(velocity.y) > this._cancelClickEventInDragSessionVelocity) {
+	            return;
+	          }
+	        }
+	      }
+	    }
+	    return Layer.__super__.emit.apply(this, [eventName].concat(slice.call(args), [this]));
 	  };
 	
 	  Layer.prototype.once = function(eventName, listener) {
@@ -16618,25 +17386,36 @@
 	  };
 	
 	  Layer.prototype.addListener = function(eventName, listener) {
+	    if (!eventName) {
+	      throw Error("Layer.on needs a valid event name");
+	    }
+	    if (!listener) {
+	      throw Error("Layer.on needs an event listener");
+	    }
 	    Layer.__super__.addListener.call(this, eventName, listener);
 	    return this._addListener(eventName, listener);
 	  };
 	
 	  Layer.prototype.removeListener = function(eventName, listener) {
+	    if (!eventName) {
+	      throw Error("Layer.off needs a valid event name");
+	    }
 	    Layer.__super__.removeListener.call(this, eventName, listener);
 	    return this._removeListener(eventName, listener);
 	  };
 	
 	  Layer.prototype._addListener = function(eventName, listener) {
-	    if (!this._domEventManager.listeners(eventName).length) {
-	      this._domEventManager.addEventListener(eventName, (function(_this) {
-	        return function(event) {
-	          return _this.emit(eventName, event);
-	        };
-	      })(this));
-	    }
 	    if (!_.startsWith(eventName, "change:")) {
-	      return this.ignoreEvents = false;
+	      this.ignoreEvents = false;
+	    }
+	    if (Utils.domValidEvent(this._element, eventName) || indexOf.call(_.values(Gestures), eventName) >= 0) {
+	      if (!this._domEventManager.listeners(eventName).length) {
+	        return this._domEventManager.addEventListener(eventName, (function(_this) {
+	          return function(event) {
+	            return _this.emit(eventName, event);
+	          };
+	        })(this));
+	      }
 	    }
 	  };
 	
@@ -16644,6 +17423,18 @@
 	    if (!this.listeners(eventName).length) {
 	      return this._domEventManager.removeAllListeners(eventName);
 	    }
+	  };
+	
+	  Layer.prototype._parentDraggableLayer = function() {
+	    var i, layer, len, ref, ref1;
+	    ref = this.ancestors();
+	    for (i = 0, len = ref.length; i < len; i++) {
+	      layer = ref[i];
+	      if ((ref1 = layer._draggable) != null ? ref1.enabled : void 0) {
+	        return layer;
+	      }
+	    }
+	    return null;
 	  };
 	
 	  Layer.prototype.on = Layer.prototype.addListener;
@@ -16658,8 +17449,24 @@
 	    return this.on(Events.DoubleClick, cb);
 	  };
 	
+	  Layer.prototype.onScrollStart = function(cb) {
+	    return this.on(Events.ScrollStart, cb);
+	  };
+	
 	  Layer.prototype.onScroll = function(cb) {
 	    return this.on(Events.Scroll, cb);
+	  };
+	
+	  Layer.prototype.onScrollEnd = function(cb) {
+	    return this.on(Events.ScrollEnd, cb);
+	  };
+	
+	  Layer.prototype.onScrollAnimationDidStart = function(cb) {
+	    return this.on(Events.ScrollAnimationDidStart, cb);
+	  };
+	
+	  Layer.prototype.onScrollAnimationDidEnd = function(cb) {
+	    return this.on(Events.ScrollAnimationDidEnd, cb);
 	  };
 	
 	  Layer.prototype.onTouchStart = function(cb) {
@@ -16758,16 +17565,192 @@
 	    return this.on(Events.DragEnd, cb);
 	  };
 	
-	  Layer.prototype.onDragAnimationDidStart = function(cb) {
-	    return this.on(Events.DragAnimationDidStart, cb);
+	  Layer.prototype.onDragAnimationStart = function(cb) {
+	    return this.on(Events.DragAnimationStart, cb);
 	  };
 	
-	  Layer.prototype.onDragAnimationDidEnd = function(cb) {
-	    return this.on(Events.DragAnimationDidEnd, cb);
+	  Layer.prototype.onDragAnimationEnd = function(cb) {
+	    return this.on(Events.DragAnimationEnd, cb);
 	  };
 	
-	  Layer.prototype.onDirectionLockDidStart = function(cb) {
-	    return this.on(Events.DirectionLockDidStart, cb);
+	  Layer.prototype.onDirectionLockStart = function(cb) {
+	    return this.on(Events.DirectionLockStart, cb);
+	  };
+	
+	  Layer.prototype.onStateDidSwitch = function(cb) {
+	    return this.on(Events.StateDidSwitch, cb);
+	  };
+	
+	  Layer.prototype.onStateWillSwitch = function(cb) {
+	    return this.on(Events.StateWillSwitch, cb);
+	  };
+	
+	  Layer.prototype.onTap = function(cb) {
+	    return this.on(Events.Tap, cb);
+	  };
+	
+	  Layer.prototype.onTapStart = function(cb) {
+	    return this.on(Events.TapStart, cb);
+	  };
+	
+	  Layer.prototype.onTapEnd = function(cb) {
+	    return this.on(Events.TapEnd, cb);
+	  };
+	
+	  Layer.prototype.onDoubleTap = function(cb) {
+	    return this.on(Events.DoubleTap, cb);
+	  };
+	
+	  Layer.prototype.onForceTap = function(cb) {
+	    return this.on(Events.ForceTap, cb);
+	  };
+	
+	  Layer.prototype.onForceTapChange = function(cb) {
+	    return this.on(Events.ForceTapChange, cb);
+	  };
+	
+	  Layer.prototype.onForceTapStart = function(cb) {
+	    return this.on(Events.ForceTapStart, cb);
+	  };
+	
+	  Layer.prototype.onForceTapEnd = function(cb) {
+	    return this.on(Events.ForceTapEnd, cb);
+	  };
+	
+	  Layer.prototype.onLongPress = function(cb) {
+	    return this.on(Events.LongPress, cb);
+	  };
+	
+	  Layer.prototype.onLongPressStart = function(cb) {
+	    return this.on(Events.LongPressStart, cb);
+	  };
+	
+	  Layer.prototype.onLongPressEnd = function(cb) {
+	    return this.on(Events.LongPressEnd, cb);
+	  };
+	
+	  Layer.prototype.onSwipe = function(cb) {
+	    return this.on(Events.Swipe, cb);
+	  };
+	
+	  Layer.prototype.onSwipeStart = function(cb) {
+	    return this.on(Events.SwipeStart, cb);
+	  };
+	
+	  Layer.prototype.onSwipeEnd = function(cb) {
+	    return this.on(Events.SwipeEnd, cb);
+	  };
+	
+	  Layer.prototype.onSwipeUp = function(cb) {
+	    return this.on(Events.SwipeUp, cb);
+	  };
+	
+	  Layer.prototype.onSwipeUpStart = function(cb) {
+	    return this.on(Events.SwipeUpStart, cb);
+	  };
+	
+	  Layer.prototype.onSwipeUpEnd = function(cb) {
+	    return this.on(Events.SwipeUpEnd, cb);
+	  };
+	
+	  Layer.prototype.onSwipeDown = function(cb) {
+	    return this.on(Events.SwipeDown, cb);
+	  };
+	
+	  Layer.prototype.onSwipeDownStart = function(cb) {
+	    return this.on(Events.SwipeDownStart, cb);
+	  };
+	
+	  Layer.prototype.onSwipeDownEnd = function(cb) {
+	    return this.on(Events.SwipeDownEnd, cb);
+	  };
+	
+	  Layer.prototype.onSwipeLeft = function(cb) {
+	    return this.on(Events.SwipeLeft, cb);
+	  };
+	
+	  Layer.prototype.onSwipeLeftStart = function(cb) {
+	    return this.on(Events.SwipeLeftStart, cb);
+	  };
+	
+	  Layer.prototype.onSwipeLeftEnd = function(cb) {
+	    return this.on(Events.SwipeLeftEnd, cb);
+	  };
+	
+	  Layer.prototype.onSwipeRight = function(cb) {
+	    return this.on(Events.SwipeRight, cb);
+	  };
+	
+	  Layer.prototype.onSwipeRightStart = function(cb) {
+	    return this.on(Events.SwipeRightStart, cb);
+	  };
+	
+	  Layer.prototype.onSwipeRightEnd = function(cb) {
+	    return this.on(Events.SwipeRightEnd, cb);
+	  };
+	
+	  Layer.prototype.onPan = function(cb) {
+	    return this.on(Events.Pan, cb);
+	  };
+	
+	  Layer.prototype.onPanStart = function(cb) {
+	    return this.on(Events.PanStart, cb);
+	  };
+	
+	  Layer.prototype.onPanEnd = function(cb) {
+	    return this.on(Events.PanEnd, cb);
+	  };
+	
+	  Layer.prototype.onPanLeft = function(cb) {
+	    return this.on(Events.PanLeft, cb);
+	  };
+	
+	  Layer.prototype.onPanRight = function(cb) {
+	    return this.on(Events.PanRight, cb);
+	  };
+	
+	  Layer.prototype.onPanUp = function(cb) {
+	    return this.on(Events.PanUp, cb);
+	  };
+	
+	  Layer.prototype.onPanDown = function(cb) {
+	    return this.on(Events.PanDown, cb);
+	  };
+	
+	  Layer.prototype.onPinch = function(cb) {
+	    return this.on(Events.Pinch, cb);
+	  };
+	
+	  Layer.prototype.onPinchStart = function(cb) {
+	    return this.on(Events.PinchStart, cb);
+	  };
+	
+	  Layer.prototype.onPinchEnd = function(cb) {
+	    return this.on(Events.PinchEnd, cb);
+	  };
+	
+	  Layer.prototype.onScale = function(cb) {
+	    return this.on(Events.Scale, cb);
+	  };
+	
+	  Layer.prototype.onScaleStart = function(cb) {
+	    return this.on(Events.ScaleStart, cb);
+	  };
+	
+	  Layer.prototype.onScaleEnd = function(cb) {
+	    return this.on(Events.ScaleEnd, cb);
+	  };
+	
+	  Layer.prototype.onRotate = function(cb) {
+	    return this.on(Events.Rotate, cb);
+	  };
+	
+	  Layer.prototype.onRotateStart = function(cb) {
+	    return this.on(Events.RotateStart, cb);
+	  };
+	
+	  Layer.prototype.onRotateEnd = function(cb) {
+	    return this.on(Events.RotateEnd, cb);
 	  };
 	
 	  Layer.prototype.toInspect = function() {
@@ -16790,14 +17773,14 @@
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var FramerCSS, Utils;
 	
 	Utils = __webpack_require__(4);
 	
-	FramerCSS = "body {\n	margin: 0;\n}\n\n.framerContext {	\n	position: absolute;\n	left: 0;\n	top: 0;\n	right: 0;\n	bottom: 0;\n	pointer-events: none;\n	overflow: hidden;\n}\n\n.framerLayer {\n	display: block;\n	position: absolute;\n	left: 0;\n	top: 0;\n	background-repeat: no-repeat;\n	background-size: cover;\n	-webkit-overflow-scrolling: touch;\n	-webkit-box-sizing: border-box;\n	-webkit-user-select: none;\n}\n\n.framerLayer input,\n.framerLayer textarea,\n.framerLayer select,\n.framerLayer option,\n.framerLayer div[contenteditable=true]\n{\n	pointer-events: auto;\n	-webkit-user-select: auto;\n}\n\n.framerDebug {\n	padding: 6px;\n	color: #fff;\n	font: 10px/1em Monaco;\n}\n";
+	FramerCSS = "body {\n	margin: 0;\n}\n\n.framerContext {\n	position: absolute;\n	left: 0;\n	top: 0;\n	right: 0;\n	bottom: 0;\n	pointer-events: none;\n}\n\n.framerLayer {\n	display: block;\n	position: absolute;\n	left: 0;\n	top: 0;\n	background-repeat: no-repeat;\n	background-position: center;\n	background-size: cover;\n	-webkit-overflow-scrolling: touch;\n	-webkit-box-sizing: border-box;\n	-webkit-user-select: none;\n}\n\n.framerLayer input,\n.framerLayer textarea,\n.framerLayer select,\n.framerLayer option,\n.framerLayer div[contenteditable=true]\n{\n	pointer-events: auto;\n	-webkit-user-select: auto;\n}\n\n.framerDebug {\n	padding: 6px;\n	color: #fff;\n	font: 10px/1em Monaco;\n}\n";
 	
 	Utils.domComplete(function() {
 	  return Utils.insertCSS(FramerCSS);
@@ -16805,14 +17788,17 @@
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Events, Utils, _;
+	var Events, Gestures, Utils, _,
+	  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+	
+	Utils = __webpack_require__(4);
 	
 	_ = __webpack_require__(1)._;
 	
-	Utils = __webpack_require__(4);
+	Gestures = __webpack_require__(16).Gestures;
 	
 	Events = {};
 	
@@ -16864,6 +17850,8 @@
 	
 	Events.ImageLoadError = "error";
 	
+	_.extend(Events, Gestures);
+	
 	Events.touchEvent = function(event) {
 	  var ref, ref1, touchEvent;
 	  touchEvent = (ref = event.touches) != null ? ref[0] : void 0;
@@ -16880,11 +17868,140 @@
 	  return Framer.CurrentContext.domEventManager.wrap(element);
 	};
 	
+	Events.isGesture = function(eventName) {
+	  return indexOf.call(Gestures, eventName) >= 0;
+	};
+	
 	exports.Events = Events;
 
 
 /***/ },
-/* 15 */
+/* 16 */
+/***/ function(module, exports) {
+
+	var Gestures;
+	
+	Gestures = {};
+	
+	Gestures.Tap = "tap";
+	
+	Gestures.TapStart = "tapstart";
+	
+	Gestures.TapEnd = "tapend";
+	
+	Gestures.DoubleTap = "doubletap";
+	
+	Gestures.ForceTap = "forcetap";
+	
+	Gestures.ForceTapChange = "forcetapchange";
+	
+	Gestures.ForceTapStart = "forcetapstart";
+	
+	Gestures.ForceTapEnd = "forcetapend";
+	
+	Gestures.LongPress = "longpress";
+	
+	Gestures.LongPressStart = "longpressstart";
+	
+	Gestures.LongPressEnd = "longpressend";
+	
+	Gestures.Swipe = "swipe";
+	
+	Gestures.SwipeStart = "swipestart";
+	
+	Gestures.SwipeEnd = "swipeend";
+	
+	Gestures.SwipeUp = "swipeup";
+	
+	Gestures.SwipeUpStart = "swipeupstart";
+	
+	Gestures.SwipeUpEnd = "swipeupend";
+	
+	Gestures.SwipeDown = "swipedown";
+	
+	Gestures.SwipeDownStart = "swipedownstart";
+	
+	Gestures.SwipeDownEnd = "swipedownend";
+	
+	Gestures.SwipeLeft = "swipeleft";
+	
+	Gestures.SwipeLeftStart = "swipeleftstart";
+	
+	Gestures.SwipeLeftEnd = "swipeleftend";
+	
+	Gestures.SwipeRight = "swiperight";
+	
+	Gestures.SwipeRightStart = "swiperightstart";
+	
+	Gestures.SwipeRightEnd = "swiperightend";
+	
+	Gestures.EdgeSwipe = "edgeswipe";
+	
+	Gestures.EdgeSwipeStart = "edgeswipestart";
+	
+	Gestures.EdgeSwipeEnd = "edgeswipeend";
+	
+	Gestures.EdgeSwipeTop = "edgeswipetop";
+	
+	Gestures.EdgeSwipeTopStart = "edgeswipetopstart";
+	
+	Gestures.EdgeSwipeTopEnd = "edgeswipetopend";
+	
+	Gestures.EdgeSwipeRight = "edgeswiperight";
+	
+	Gestures.EdgeSwipeRightStart = "edgeswiperightstart";
+	
+	Gestures.EdgeSwipeRightEnd = "edgeswiperightend";
+	
+	Gestures.EdgeSwipeBottom = "edgeswipebottom";
+	
+	Gestures.EdgeSwipeBottomStart = "edgeswipebottomstart";
+	
+	Gestures.EdgeSwipeBottomEnd = "edgeswipebottomend";
+	
+	Gestures.EdgeSwipeLeft = "edgeswipeleft";
+	
+	Gestures.EdgeSwipeLeftStart = "edgeswipeleftstart";
+	
+	Gestures.EdgeSwipeLeftEnd = "edgeswipeleftend";
+	
+	Gestures.Pan = "pan";
+	
+	Gestures.PanStart = "panstart";
+	
+	Gestures.PanEnd = "panend";
+	
+	Gestures.PanLeft = "panleft";
+	
+	Gestures.PanRight = "panright";
+	
+	Gestures.PanUp = "panup";
+	
+	Gestures.PanDown = "pandown";
+	
+	Gestures.Pinch = "pinch";
+	
+	Gestures.PinchStart = "pinchstart";
+	
+	Gestures.PinchEnd = "pinchend";
+	
+	Gestures.Scale = "scale";
+	
+	Gestures.ScaleStart = "scalestart";
+	
+	Gestures.ScaleEnd = "scaleend";
+	
+	Gestures.Rotate = "rotate";
+	
+	Gestures.RotateStart = "rotatestart";
+	
+	Gestures.RotateEnd = "rotateend";
+	
+	exports.Gestures = Gestures;
+
+
+/***/ },
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Originals, Utils, _;
@@ -16895,26 +18012,35 @@
 	
 	Originals = {
 	  Layer: {
-	    backgroundColor: "rgba(0, 124, 255, 0.5)",
+	    backgroundColor: "rgba(123,123,123,0.5)",
 	    color: "white",
-	    shadowColor: "black",
-	    width: 100,
-	    height: 100
+	    shadowColor: "rgba(123,123,123,0.5)",
+	    borderColor: "rgba(123,123,123,0.5)",
+	    width: 200,
+	    height: 200
 	  },
 	  Animation: {
 	    curve: "ease",
 	    time: 1
 	  },
+	  Context: {
+	    perspective: 0,
+	    perspectiveOriginX: 0.5,
+	    perspectiveOriginY: 0.5,
+	    parent: null,
+	    name: null
+	  },
 	  DeviceComponent: {
 	    fullScreen: false,
 	    padding: 50,
-	    deviceType: "iphone-5s-spacegray",
+	    deviceType: "apple-iphone-6s-silver",
 	    deviceZoom: "fit",
 	    contentZoom: 1,
 	    orientation: "portrait",
 	    keyboard: false,
 	    animationOptions: {
-	      curve: "spring(400,40,0)"
+	      time: .3,
+	      curve: "ease-in-out"
 	    }
 	  },
 	  LayerDraggable: {
@@ -17006,10 +18132,10 @@
 
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var AnimatorClassBezierPresets, AnimatorClasses, BezierCurveAnimator, Config, Defaults, EventEmitter, LinearAnimator, SpringDHOAnimator, SpringRK4Animator, Utils, _, evaluateRelativeProperty, isRelativeProperty, numberRE, relativePropertyRE,
+	var AnimatorClassBezierPresets, AnimatorClasses, BaseClass, BezierCurveAnimator, Config, Defaults, LinearAnimator, SpringDHOAnimator, SpringRK4Animator, Utils, _, evaluateRelativeProperty, isRelativeProperty, numberRE, relativePropertyRE,
 	  slice = [].slice,
 	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -17020,19 +18146,19 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Config = __webpack_require__(13).Config;
+	Config = __webpack_require__(14).Config;
 	
-	Defaults = __webpack_require__(15).Defaults;
+	Defaults = __webpack_require__(17).Defaults;
 	
-	EventEmitter = __webpack_require__(7).EventEmitter;
+	BaseClass = __webpack_require__(6).BaseClass;
 	
-	LinearAnimator = __webpack_require__(17).LinearAnimator;
+	LinearAnimator = __webpack_require__(19).LinearAnimator;
 	
-	BezierCurveAnimator = __webpack_require__(19).BezierCurveAnimator;
+	BezierCurveAnimator = __webpack_require__(21).BezierCurveAnimator;
 	
-	SpringRK4Animator = __webpack_require__(20).SpringRK4Animator;
+	SpringRK4Animator = __webpack_require__(22).SpringRK4Animator;
 	
-	SpringDHOAnimator = __webpack_require__(22).SpringDHOAnimator;
+	SpringDHOAnimator = __webpack_require__(24).SpringDHOAnimator;
 	
 	AnimatorClasses = {
 	  "linear": LinearAnimator,
@@ -17071,7 +18197,9 @@
 	    if (options == null) {
 	      options = {};
 	    }
-	    this._updateValue = bind(this._updateValue, this);
+	    this._updateColorValue = bind(this._updateColorValue, this);
+	    this._updateNumberValue = bind(this._updateNumberValue, this);
+	    this._updateValues = bind(this._updateValues, this);
 	    this._update = bind(this._update, this);
 	    this._start = bind(this._start, this);
 	    this.start = bind(this.start, this);
@@ -17097,6 +18225,12 @@
 	    this._repeatCounter = this.options.repeat;
 	  }
 	
+	  Animation.define("isAnimating", {
+	    get: function() {
+	      return indexOf.call(this.options.layer.context.animations, this) >= 0;
+	    }
+	  });
+	
 	  Animation.prototype.start = function() {
 	    var AnimatorClass, animation, k, property, ref, ref1, ref2, v;
 	    if (this.options.layer === null) {
@@ -17114,7 +18248,7 @@
 	    for (k in ref) {
 	      v = ref[k];
 	      if (_.isFunction(v)) {
-	        v = v();
+	        v = v(this.options.layer, k);
 	      } else if (isRelativeProperty(v)) {
 	        v = evaluateRelativeProperty(this._target, k, v);
 	      }
@@ -17218,34 +18352,52 @@
 	  };
 	
 	  Animation.prototype._start = function() {
+	    var k, ref, results, v;
 	    this.options.layer.context.addAnimation(this);
 	    this.emit("start");
-	    return Framer.Loop.on("update", this._update);
+	    Framer.Loop.on("update", this._update);
+	    this._valueUpdaters = {};
+	    ref = this._stateB;
+	    results = [];
+	    for (k in ref) {
+	      v = ref[k];
+	      if (Color.isColorObject(v) || Color.isColorObject(this._stateA[k])) {
+	        results.push(this._valueUpdaters[k] = this._updateColorValue);
+	      } else {
+	        results.push(this._valueUpdaters[k] = this._updateNumberValue);
+	      }
+	    }
+	    return results;
 	  };
 	
 	  Animation.prototype._update = function(delta) {
 	    var emit;
 	    if (this._animator.finished()) {
-	      this._updateValue(1);
+	      this._updateValues(1);
 	      this.stop(emit = false);
 	      this.emit("end");
 	      return this.emit("stop");
 	    } else {
-	      return this._updateValue(this._animator.next(delta));
+	      return this._updateValues(this._animator.next(delta));
 	    }
 	  };
 	
-	  Animation.prototype._updateValue = function(value) {
+	  Animation.prototype._updateValues = function(value) {
 	    var k, ref, v;
 	    ref = this._stateB;
 	    for (k in ref) {
 	      v = ref[k];
-	      if (Color.isColorObject(v) || Color.isColorObject(this._stateA[k])) {
-	        this._target[k] = Color.mix(this._stateA[k], this._stateB[k], value, false, this.options.colorModel);
-	      } else {
-	        this._target[k] = Utils.mapRange(value, 0, 1, this._stateA[k], this._stateB[k]);
-	      }
+	      this._valueUpdaters[k](k, value);
 	    }
+	    return null;
+	  };
+	
+	  Animation.prototype._updateNumberValue = function(key, value) {
+	    return this._target[key] = Utils.mapRange(value, 0, 1, this._stateA[key], this._stateB[key]);
+	  };
+	
+	  Animation.prototype._updateColorValue = function(key, value) {
+	    return this._target[key] = Color.mix(this._stateA[key], this._stateB[key], value, false, this.options.colorModel);
 	  };
 	
 	  Animation.prototype._currentState = function() {
@@ -17335,6 +18487,10 @@
 	    return animatableProperties;
 	  };
 	
+	  Animation.prototype.toInspect = function() {
+	    return "<" + this.constructor.name + " id:" + this.id + " isAnimating:" + this.isAnimating + " [" + (_.keys(this.options.properties)) + "]>";
+	  };
+	
 	  Animation.prototype.onAnimationStart = function(cb) {
 	    return this.on(Events.AnimationStart, cb);
 	  };
@@ -17361,11 +18517,11 @@
 	
 	  return Animation;
 	
-	})(EventEmitter);
+	})(BaseClass);
 
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Animator, Utils,
@@ -17374,7 +18530,7 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Animator = __webpack_require__(18).Animator;
+	Animator = __webpack_require__(20).Animator;
 	
 	exports.LinearAnimator = (function(superClass) {
 	  extend(LinearAnimator, superClass);
@@ -17409,14 +18565,14 @@
 
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Config, Utils;
 	
 	Utils = __webpack_require__(4);
 	
-	Config = __webpack_require__(13).Config;
+	Config = __webpack_require__(14).Config;
 	
 	exports.Animator = (function() {
 	  "The animator class is a very simple class that\n	- Takes a set of input values at setup({input values})\n	- Emits an output value for progress (0 -> 1) in value(progress)";
@@ -17445,7 +18601,7 @@
 
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Animator, BezierCurveDefaults, UnitBezier, Utils, _,
@@ -17456,7 +18612,7 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Animator = __webpack_require__(18).Animator;
+	Animator = __webpack_require__(20).Animator;
 	
 	BezierCurveDefaults = {
 	  "linear": [0, 0, 1, 1],
@@ -17588,7 +18744,7 @@
 
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Animator, Integrator, Utils,
@@ -17598,9 +18754,9 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Animator = __webpack_require__(18).Animator;
+	Animator = __webpack_require__(20).Animator;
 	
-	Integrator = __webpack_require__(21).Integrator;
+	Integrator = __webpack_require__(23).Integrator;
 	
 	exports.SpringRK4Animator = (function(superClass) {
 	  extend(SpringRK4Animator, superClass);
@@ -17612,8 +18768,8 @@
 	
 	  SpringRK4Animator.prototype.setup = function(options) {
 	    this.options = _.defaults(options, {
-	      tension: 500,
-	      friction: 10,
+	      tension: 250,
+	      friction: 25,
 	      velocity: 0,
 	      tolerance: 1 / 10000,
 	      time: null
@@ -17661,14 +18817,14 @@
 
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Config, Utils;
 	
 	Utils = __webpack_require__(4);
 	
-	Config = __webpack_require__(13).Config;
+	Config = __webpack_require__(14).Config;
 	
 	exports.Integrator = (function() {
 	  "Usage:\n	- Instantiate with a function that takes (state) -> acceleration\n	- Call integrateState with state={x, v} and delta";
@@ -17720,7 +18876,7 @@
 
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Animator, Utils,
@@ -17730,7 +18886,7 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Animator = __webpack_require__(18).Animator;
+	Animator = __webpack_require__(20).Animator;
 	
 	exports.SpringDHOAnimator = (function(superClass) {
 	  extend(SpringDHOAnimator, superClass);
@@ -17780,7 +18936,7 @@
 
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports) {
 
 	var _Force2DProperties, _WebkitProperties, filterFormat;
@@ -17817,6 +18973,20 @@
 	  },
 	  opacity: function(layer) {
 	    return layer._properties.opacity;
+	  },
+	  webkitTransformStyle: function(layer) {
+	    if (layer._properties.flat) {
+	      return "flat";
+	    } else {
+	      return "preserve-3d";
+	    }
+	  },
+	  webkitBackfaceVisibility: function(layer) {
+	    if (layer._properties.backfaceVisible) {
+	      return "visible";
+	    } else {
+	      return "hidden";
+	    }
 	  },
 	  overflow: function(layer) {
 	    if (layer._properties.scrollHorizontal === true || layer._properties.scrollVertical === true) {
@@ -17863,7 +19033,7 @@
 	    if (layer._prefer2d || layer._properties.force2d) {
 	      return exports.LayerStyle.webkitTransformForce2d(layer);
 	    }
-	    return "translate3d(" + layer._properties.x + "px," + layer._properties.y + "px," + layer._properties.z + "px) scale(" + layer._properties.scale + ") scale3d(" + layer._properties.scaleX + "," + layer._properties.scaleY + "," + layer._properties.scaleZ + ") skew(" + layer._properties.skew + "deg," + layer._properties.skew + "deg) skewX(" + layer._properties.skewX + "deg) skewY(" + layer._properties.skewY + "deg) rotateX(" + layer._properties.rotationX + "deg) rotateY(" + layer._properties.rotationY + "deg) rotateZ(" + layer._properties.rotationZ + "deg)";
+	    return "translate3d( " + layer._properties.x + "px, " + layer._properties.y + "px, " + layer._properties.z + "px) scale3d( " + (layer._properties.scaleX * layer._properties.scale) + ", " + (layer._properties.scaleY * layer._properties.scale) + ", " + layer._properties.scaleZ + ") skew(" + layer._properties.skew + "deg," + layer._properties.skew + "deg) skewX(" + layer._properties.skewX + "deg) skewY(" + layer._properties.skewY + "deg) translateZ(" + layer._properties.originZ + "px) rotateX(" + layer._properties.rotationX + "deg) rotateY(" + layer._properties.rotationY + "deg) rotateZ(" + layer._properties.rotationZ + "deg) translateZ(" + (-layer._properties.originZ) + "px)";
 	  },
 	  webkitTransformForce2d: function(layer) {
 	    var css, p, v;
@@ -17885,6 +19055,9 @@
 	  },
 	  webkitPerspective: function(layer) {
 	    return "" + layer._properties.perspective;
+	  },
+	  webkitPerspectiveOrigin: function(layer) {
+	    return (layer._properties.perspectiveOriginX * 100) + "% " + (layer._properties.perspectiveOriginY * 100) + "%";
 	  },
 	  pointerEvents: function(layer) {
 	    if (layer._properties.ignoreEvents) {
@@ -17922,7 +19095,7 @@
 
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var BaseClass, Defaults, Events, LayerStatesIgnoredKeys, _,
@@ -17933,11 +19106,11 @@
 	
 	_ = __webpack_require__(1)._;
 	
-	Events = __webpack_require__(14).Events;
+	Events = __webpack_require__(15).Events;
 	
 	BaseClass = __webpack_require__(6).BaseClass;
 	
-	Defaults = __webpack_require__(15).Defaults;
+	Defaults = __webpack_require__(17).Defaults;
 	
 	LayerStatesIgnoredKeys = ["ignoreEvents"];
 	
@@ -18012,7 +19185,7 @@
 	        continue;
 	      }
 	      if (_.isFunction(value)) {
-	        value = value.call(this.layer, this.layer, stateName);
+	        value = value.call(this.layer, this.layer, propertyName, stateName);
 	      }
 	      properties[propertyName] = value;
 	    }
@@ -18032,7 +19205,7 @@
 	    }
 	    if (instant === true) {
 	      this.layer.props = properties;
-	      return this.emit(Events.StateDidSwitch, _.last(this._previousStates), stateName, this);
+	      return this.emit(Events.StateDidSwitch, _.last(this._previousStates), this._currentState, this);
 	    } else {
 	      if (animationOptions == null) {
 	        animationOptions = this.animationOptions;
@@ -18042,7 +19215,7 @@
 	        ref1.stop();
 	      }
 	      this._animation = this.layer.animate(animationOptions);
-	      return this._animation.on("stop", (function(_this) {
+	      return this._animation.once("stop", (function(_this) {
 	        return function() {
 	          for (k in properties) {
 	            v = properties[k];
@@ -18050,7 +19223,9 @@
 	              _this.layer[k] = v;
 	            }
 	          }
-	          return _this.emit(Events.StateDidSwitch, _.last(_this._previousStates), stateName, _this);
+	          if (_.last(_this._previousStates) !== stateName) {
+	            return _this.emit(Events.StateDidSwitch, _.last(_this._previousStates), _this._currentState, _this);
+	          }
 	        };
 	      })(this));
 	    }
@@ -18069,6 +19244,12 @@
 	  LayerStates.define("current", {
 	    get: function() {
 	      return this._currentState;
+	    }
+	  });
+	
+	  LayerStates.define("all", {
+	    get: function() {
+	      return _.clone(this._orderedStates);
 	    }
 	  });
 	
@@ -18134,10 +19315,10 @@
 
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var BaseClass, Defaults, EventBuffer, Events, Simulation, Utils, _,
+	var BaseClass, Defaults, EventBuffer, Events, Gestures, Simulation, Utils, _,
 	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
@@ -18148,13 +19329,15 @@
 	
 	BaseClass = __webpack_require__(6).BaseClass;
 	
-	Events = __webpack_require__(14).Events;
+	Events = __webpack_require__(15).Events;
 	
-	Simulation = __webpack_require__(26).Simulation;
+	Simulation = __webpack_require__(28).Simulation;
 	
-	Defaults = __webpack_require__(15).Defaults;
+	Defaults = __webpack_require__(17).Defaults;
 	
-	EventBuffer = __webpack_require__(31).EventBuffer;
+	EventBuffer = __webpack_require__(33).EventBuffer;
+	
+	Gestures = __webpack_require__(16).Gestures;
 	
 	Events.Move = "move";
 	
@@ -18170,13 +19353,25 @@
 	
 	Events.DragEnd = "dragend";
 	
-	Events.DragAnimationDidStart = "draganimationdidstart";
+	Events.DragAnimationStart = "draganimationstart";
 	
-	Events.DragAnimationDidEnd = "draganimationdidend";
+	Events.DragAnimationEnd = "draganimationend";
 	
-	Events.DirectionLockDidStart = "directionlockdidstart";
+	Events.DirectionLockStart = "directionlockstart";
 	
-	"         \n┌──────┐                   │         \n│      │                             \n│      │  ───────────────▶ │ ◀────▶  \n│      │                             \n└──────┘                   │         \n                                     \n════════  ═════════════════ ═══════  \n                                     \n  Drag         Momentum      Bounce  \n                                         ";
+	Events.DragSessionStart = "dragsessionstart";
+	
+	Events.DragSessionMove = "dragsessionmove";
+	
+	Events.DragSessionEnd = "dragsessionend";
+	
+	Events.DragAnimationDidStart = Events.DragAnimationStart;
+	
+	Events.DragAnimationDidEnd = Events.DragAnimationEnd;
+	
+	Events.DirectionLockDidStart = Events.DirectionLockStart;
+	
+	"\n┌──────┐                   │\n│      │\n│      │  ───────────────▶ │ ◀────▶\n│      │\n└──────┘                   │\n\n════════  ═════════════════ ═══════\n\n  Drag         Momentum      Bounce\n";
 	
 	exports.LayerDraggable = (function(superClass) {
 	  extend(LayerDraggable, superClass);
@@ -18206,12 +19401,14 @@
 	    },
 	    set: function(value) {
 	      if (value && _.isObject(value)) {
-	        this._constraints = _.defaults(value, {
+	        value = _.pick(value, ["x", "y", "width", "height"]);
+	        value = _.defaults(value, {
 	          x: 0,
 	          y: 0,
 	          width: 0,
 	          height: 0
 	        });
+	        this._constraints = value;
 	      } else {
 	        this._constraints = {
 	          x: 0,
@@ -18293,6 +19490,7 @@
 	    this._touchEnd = bind(this._touchEnd, this);
 	    this._touchMove = bind(this._touchMove, this);
 	    this._touchStart = bind(this._touchStart, this);
+	    this._updateLayerPosition = bind(this._updateLayerPosition, this);
 	    this.touchStart = bind(this.touchStart, this);
 	    options = Defaults.getDefaults("LayerDraggable", {});
 	    LayerDraggable.__super__.constructor.call(this, options);
@@ -18300,15 +19498,20 @@
 	    this.enabled = true;
 	    this._eventBuffer = new EventBuffer;
 	    this._constraints = null;
+	    this._ignoreUpdateLayerPosition = true;
 	    this.attach();
 	  }
 	
 	  LayerDraggable.prototype.attach = function() {
-	    return this.layer.on(Events.TouchStart, this._touchStart);
+	    this.layer.on(Gestures.TapStart, this.touchStart);
+	    this.layer.on("change:x", this._updateLayerPosition);
+	    return this.layer.on("change:y", this._updateLayerPosition);
 	  };
 	
 	  LayerDraggable.prototype.remove = function() {
-	    return this.layer.off(Events.TouchStart, this._touchStart);
+	    this.layer.off(Gestures.TapStart, this.touchStart);
+	    this.layer.off(Gestures.Pan, this._touchMove);
+	    return this.layer.off(Gestures.PanEnd, this._touchEnd);
 	  };
 	
 	  LayerDraggable.prototype.updatePosition = function(point) {
@@ -18319,14 +19522,30 @@
 	    return this._touchStart(event);
 	  };
 	
+	  LayerDraggable.prototype._updateLayerPosition = function() {
+	    if (this._ignoreUpdateLayerPosition === true) {
+	      return;
+	    }
+	    return this._point = this.layer.point;
+	  };
+	
 	  LayerDraggable.prototype._touchStart = function(event) {
-	    var touchEvent;
+	    var animation, i, len, properties, ref, touchEvent;
+	    Events.wrap(document).addEventListener(Gestures.Pan, this._touchMove);
+	    Events.wrap(document).addEventListener(Gestures.TapEnd, this._touchEnd);
 	    this._isMoving = this.isAnimating;
-	    this.layer.animateStop();
+	    ref = this.layer.animations();
+	    for (i = 0, len = ref.length; i < len; i++) {
+	      animation = ref[i];
+	      properties = animation.options.properties;
+	      if (properties.hasOwnProperty("x") || properties.hasOwnProperty("y")) {
+	        animation.stop();
+	      }
+	    }
 	    this._stopSimulation();
 	    this._resetdirectionLock();
 	    event.preventDefault();
-	    if (!this.propagateEvents) {
+	    if (this.propagateEvents === false) {
 	      event.stopPropagation();
 	    }
 	    touchEvent = Events.touchEvent(event);
@@ -18348,18 +19567,22 @@
 	      x: touchEvent.clientX - this._correctedLayerStartPoint.x,
 	      y: touchEvent.clientY - this._correctedLayerStartPoint.y
 	    };
-	    this.layer._context.domEventManager.wrap(document).addEventListener(Events.TouchMove, this._touchMove);
-	    this.layer._context.domEventManager.wrap(document).addEventListener(Events.TouchEnd, this._touchEnd);
-	    return this.emit(Events.DragStart, event);
+	    this._point = this._correctedLayerStartPoint;
+	    this._ignoreUpdateLayerPosition = false;
+	    return this.emit(Events.DragSessionStart, event);
 	  };
 	
 	  LayerDraggable.prototype._touchMove = function(event) {
-	    var offset, point, touchEvent;
+	    var offset, point, scaleX, scaleY, touchEvent;
 	    if (!this.enabled) {
 	      return;
 	    }
+	    if (!this._point) {
+	      this.touchStart(event);
+	    }
+	    this._lastEvent = event;
 	    event.preventDefault();
-	    if (!this.propagateEvents) {
+	    if (this.propagateEvents === false) {
 	      event.stopPropagation();
 	    }
 	    touchEvent = Events.touchEvent(event);
@@ -18368,24 +19591,24 @@
 	      y: touchEvent.clientY,
 	      t: Date.now()
 	    });
-	    offset = {
-	      x: touchEvent.clientX - this._correctedLayerStartPoint.x - this._layerCursorOffset.x,
-	      y: touchEvent.clientY - this._correctedLayerStartPoint.y - this._layerCursorOffset.y
-	    };
-	    offset.x = offset.x * this.speedX * (1 / this.layer.canvasScaleX()) * this.layer.scaleX * this.layer.scale;
-	    offset.y = offset.y * this.speedY * (1 / this.layer.canvasScaleY()) * this.layer.scaleY * this.layer.scale;
-	    point = this.layer.point;
+	    point = _.clone(this._point);
+	    scaleX = 1 / this.layer.canvasScaleX() * this.layer.scale * this.layer.scaleX;
+	    scaleY = 1 / this.layer.canvasScaleY() * this.layer.scale * this.layer.scaleY;
 	    if (this.horizontal) {
-	      point.x = this._correctedLayerStartPoint.x + offset.x;
+	      point.x = this._point.x + (event.delta.x * scaleX * this.speedX);
 	    }
 	    if (this.vertical) {
-	      point.y = this._correctedLayerStartPoint.y + offset.y;
+	      point.y = this._point.y + (event.delta.y * scaleY * this.speedY);
 	    }
+	    this._point = _.clone(point);
 	    if (this._constraints) {
 	      point = this._constrainPosition(point, this._constraints, this.overdragScale);
 	    }
 	    if (this.directionLock) {
 	      if (!this._directionLockEnabledX && !this._directionLockEnabledY) {
+	        offset = event.offset;
+	        offset.x = offset.x * this.speedX * (1 / this.layer.canvasScaleX()) * this.layer.scaleX * this.layer.scale;
+	        offset.y = offset.y * this.speedY * (1 / this.layer.canvasScaleY()) * this.layer.scaleY * this.layer.scale;
 	        this._updatedirectionLock(offset);
 	        return;
 	      } else {
@@ -18397,33 +19620,47 @@
 	        }
 	      }
 	    }
-	    if (this.pixelAlign) {
-	      point.x = parseInt(point.x);
-	      point.y = parseInt(point.y);
-	    }
 	    if (point.x !== this._layerStartPoint.x || point.y !== this._layerStartPoint.y) {
-	      this._isDragging = true;
-	      this._isMoving = true;
+	      if (!this._isDragging) {
+	        this._isDragging = true;
+	        this._isMoving = true;
+	        this.emit(Events.DragStart, event);
+	      }
 	    }
 	    if (this.isDragging) {
 	      this.emit(Events.DragWillMove, event);
 	    }
+	    if (this.pixelAlign) {
+	      if (this.horizontal) {
+	        point.x = parseInt(point.x);
+	      }
+	      if (this.vertical) {
+	        point.y = parseInt(point.y);
+	      }
+	    }
+	    this._ignoreUpdateLayerPosition = true;
 	    this.layer.point = this.updatePosition(point);
+	    this._ignoreUpdateLayerPosition = false;
 	    if (this.isDragging) {
 	      this.emit(Events.Move, this.layer.point);
-	      return this.emit(Events.DragDidMove, event);
+	      this.emit(Events.DragDidMove, event);
 	    }
+	    return this.emit(Events.DragSessionMove, event);
 	  };
 	
 	  LayerDraggable.prototype._touchEnd = function(event) {
-	    if (!this.propagateEvents) {
+	    Events.wrap(document).removeEventListener(Gestures.Pan, this._touchMove);
+	    Events.wrap(document).removeEventListener(Gestures.TapEnd, this._touchEnd);
+	    if (this.propagateEvents === false) {
 	      event.stopPropagation();
 	    }
-	    this.layer._context.domEventManager.wrap(document).removeEventListener(Events.TouchMove, this._touchMove);
-	    this.layer._context.domEventManager.wrap(document).removeEventListener(Events.TouchEnd, this._touchEnd);
 	    this._startSimulation();
-	    this.emit(Events.DragEnd, event);
-	    return this._isDragging = false;
+	    this.emit(Events.DragSessionEnd, event);
+	    if (this._isDragging) {
+	      this.emit(Events.DragEnd, event);
+	    }
+	    this._isDragging = false;
+	    return this._ignoreUpdateLayerPosition = true;
 	  };
 	
 	  LayerDraggable.define("constraintsOffset", {
@@ -18482,6 +19719,12 @@
 	        minY: Infinity,
 	        maxY: Infinity
 	      };
+	    }
+	    if (bounds.width < this.layer.width) {
+	      bounds.width = this.layer.width;
+	    }
+	    if (bounds.height < this.layer.height) {
+	      bounds.height = this.layer.height;
 	    }
 	    constraints = {
 	      minX: Utils.frameGetMinX(bounds),
@@ -18576,15 +19819,15 @@
 	  };
 	
 	  LayerDraggable.prototype.emit = function(eventName, event) {
-	    this.layer.emit(eventName, event, this);
-	    return LayerDraggable.__super__.emit.call(this, eventName, event, this);
+	    this.layer.emit(eventName, event);
+	    return LayerDraggable.__super__.emit.call(this, eventName, event);
 	  };
 	
 	  LayerDraggable.prototype._updatedirectionLock = function(correctedDelta) {
 	    this._directionLockEnabledX = Math.abs(correctedDelta.y) > this.directionLockThreshold.y;
 	    this._directionLockEnabledY = Math.abs(correctedDelta.x) > this.directionLockThreshold.x;
 	    if (this._directionLockEnabledX || this._directionLockEnabledY) {
-	      return this.emit(Events.DirectionLockDidStart, {
+	      return this.emit(Events.DirectionLockStart, {
 	        x: this._directionLockEnabledX,
 	        y: this._directionLockEnabledY
 	      });
@@ -18685,10 +19928,10 @@
 	    }
 	    updatePoint = this.layer.point;
 	    if (axis === "x") {
-	      updatePoint[axis] = updatePoint[axis] + (delta * this.speedX);
+	      updatePoint[axis] = updatePoint[axis] + delta;
 	    }
 	    if (axis === "y") {
-	      updatePoint[axis] = updatePoint[axis] + (delta * this.speedY);
+	      updatePoint[axis] = updatePoint[axis] + delta;
 	    }
 	    this.updatePosition(updatePoint);
 	    this.layer[axis] = this.updatePosition(updatePoint)[axis];
@@ -18696,6 +19939,12 @@
 	  };
 	
 	  LayerDraggable.prototype._onSimulationStop = function(axis, state) {
+	    if (axis === "x" && this.horizontal === false) {
+	      return;
+	    }
+	    if (axis === "y" && this.vertical === false) {
+	      return;
+	    }
 	    if (!this._simulation) {
 	      return;
 	    }
@@ -18744,7 +19993,7 @@
 	    if (startSimulationY) {
 	      this._simulation.y.start();
 	    }
-	    return this.emit(Events.DragAnimationDidStart);
+	    return this.emit(Events.DragAnimationStart);
 	  };
 	
 	  LayerDraggable.prototype._stopSimulation = function() {
@@ -18761,7 +20010,7 @@
 	    }
 	    this._simulation = null;
 	    this.emit(Events.Move, this.layer.point);
-	    return this.emit(Events.DragAnimationDidEnd);
+	    return this.emit(Events.DragAnimationEnd);
 	  };
 	
 	  LayerDraggable.prototype.animateStop = function() {
@@ -18796,16 +20045,16 @@
 	    return this.on(Events.DragEnd, cb);
 	  };
 	
-	  LayerDraggable.prototype.onDragAnimationDidStart = function(cb) {
-	    return this.on(Events.DragAnimationDidStart, cb);
+	  LayerDraggable.prototype.onDragAnimationStart = function(cb) {
+	    return this.on(Events.DragAnimationStart, cb);
 	  };
 	
-	  LayerDraggable.prototype.onDragAnimationDidEnd = function(cb) {
-	    return this.on(Events.DragAnimationDidEnd, cb);
+	  LayerDraggable.prototype.onDragAnimationEnd = function(cb) {
+	    return this.on(Events.DragAnimationEnd, cb);
 	  };
 	
-	  LayerDraggable.prototype.onDirectionLockDidStart = function(cb) {
-	    return this.on(Events.DirectionLockDidStart, cb);
+	  LayerDraggable.prototype.onDirectionLockStart = function(cb) {
+	    return this.on(Events.DirectionLockStart, cb);
 	  };
 	
 	  return LayerDraggable;
@@ -18814,7 +20063,7 @@
 
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var BaseClass, Config, Defaults, Events, FrictionSimulator, MomentumBounceSimulator, SimulatorClasses, SpringSimulator, Utils, _,
@@ -18827,19 +20076,19 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Config = __webpack_require__(13).Config;
+	Config = __webpack_require__(14).Config;
 	
-	Defaults = __webpack_require__(15).Defaults;
+	Defaults = __webpack_require__(17).Defaults;
 	
 	BaseClass = __webpack_require__(6).BaseClass;
 	
-	Events = __webpack_require__(14).Events;
+	Events = __webpack_require__(15).Events;
 	
-	SpringSimulator = __webpack_require__(27).SpringSimulator;
+	SpringSimulator = __webpack_require__(29).SpringSimulator;
 	
-	FrictionSimulator = __webpack_require__(29).FrictionSimulator;
+	FrictionSimulator = __webpack_require__(31).FrictionSimulator;
 	
-	MomentumBounceSimulator = __webpack_require__(30).MomentumBounceSimulator;
+	MomentumBounceSimulator = __webpack_require__(32).MomentumBounceSimulator;
 	
 	Events.SimulationStart = 'simulationStart';
 	
@@ -18964,7 +20213,7 @@
 
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Defaults, Integrator, Simulator, Utils,
@@ -18974,11 +20223,11 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Defaults = __webpack_require__(15).Defaults;
+	Defaults = __webpack_require__(17).Defaults;
 	
-	Simulator = __webpack_require__(28).Simulator;
+	Simulator = __webpack_require__(30).Simulator;
 	
-	Integrator = __webpack_require__(21).Integrator;
+	Integrator = __webpack_require__(23).Integrator;
 	
 	exports.SpringSimulator = (function(superClass) {
 	  extend(SpringSimulator, superClass);
@@ -19039,7 +20288,7 @@
 
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var BaseClass, Config, Utils, _,
@@ -19050,12 +20299,12 @@
 	
 	_ = __webpack_require__(1)._;
 	
-	Config = __webpack_require__(13).Config;
+	Config = __webpack_require__(14).Config;
 	
 	BaseClass = __webpack_require__(6).BaseClass;
 	
 	exports.Simulator = (function(superClass) {
-	  "The simulator class runs a physics simulation based on a set of input values \nat setup({input values}), and emits an output state {x, v}";
+	  "The simulator class runs a physics simulation based on a set of input values\nat setup({input values}), and emits an output state {x, v}";
 	  extend(Simulator, superClass);
 	
 	  Simulator.define("state", {
@@ -19097,7 +20346,7 @@
 
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Defaults, Integrator, Simulator, Utils,
@@ -19107,11 +20356,11 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Defaults = __webpack_require__(15).Defaults;
+	Defaults = __webpack_require__(17).Defaults;
 	
-	Simulator = __webpack_require__(28).Simulator;
+	Simulator = __webpack_require__(30).Simulator;
 	
-	Integrator = __webpack_require__(21).Integrator;
+	Integrator = __webpack_require__(23).Integrator;
 	
 	exports.FrictionSimulator = (function(superClass) {
 	  extend(FrictionSimulator, superClass);
@@ -19153,7 +20402,7 @@
 
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Defaults, FrictionSimulator, Simulator, SpringSimulator, Utils,
@@ -19163,13 +20412,13 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Defaults = __webpack_require__(15).Defaults;
+	Defaults = __webpack_require__(17).Defaults;
 	
-	Simulator = __webpack_require__(28).Simulator;
+	Simulator = __webpack_require__(30).Simulator;
 	
-	SpringSimulator = __webpack_require__(27).SpringSimulator;
+	SpringSimulator = __webpack_require__(29).SpringSimulator;
 	
-	FrictionSimulator = __webpack_require__(29).FrictionSimulator;
+	FrictionSimulator = __webpack_require__(31).FrictionSimulator;
 	
 	exports.MomentumBounceSimulator = (function(superClass) {
 	  extend(MomentumBounceSimulator, superClass);
@@ -19293,7 +20542,7 @@
 
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var BaseClass, Events, Utils, _,
@@ -19306,7 +20555,7 @@
 	
 	BaseClass = __webpack_require__(6).BaseClass;
 	
-	Events = __webpack_require__(14).Events;
+	Events = __webpack_require__(15).Events;
 	
 	Events.EventBufferReset = "eventbufferreset";
 	
@@ -19423,7 +20672,185 @@
 
 
 /***/ },
-/* 32 */
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseClass, Events, Gestures, Utils,
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
+	
+	Utils = __webpack_require__(4);
+	
+	BaseClass = __webpack_require__(6).BaseClass;
+	
+	Events = __webpack_require__(15).Events;
+	
+	Gestures = __webpack_require__(16).Gestures;
+	
+	Events.PinchStart = "pinchstart";
+	
+	Events.Pinch = "pinch";
+	
+	Events.PinchEnd = "pinchend";
+	
+	Events.RotateStart = "rotatestart";
+	
+	Events.Rotate = "rotate";
+	
+	Events.RotateEnd = "rotateend";
+	
+	Events.ScaleStart = "scalestart";
+	
+	Events.Scale = "scale";
+	
+	Events.ScaleEnd = "scaleend";
+	
+	exports.LayerPinchable = (function(superClass) {
+	  extend(LayerPinchable, superClass);
+	
+	  LayerPinchable.define("enabled", LayerPinchable.simpleProperty("enabled", true));
+	
+	  LayerPinchable.define("threshold", LayerPinchable.simpleProperty("threshold", 0));
+	
+	  LayerPinchable.define("centerOrigin", LayerPinchable.simpleProperty("centerOrigin", true));
+	
+	  LayerPinchable.define("scale", LayerPinchable.simpleProperty("scale", true));
+	
+	  LayerPinchable.define("scaleIncrements", LayerPinchable.simpleProperty("scaleIncrements", 0));
+	
+	  LayerPinchable.define("minScale", LayerPinchable.simpleProperty("minScale", 0));
+	
+	  LayerPinchable.define("maxScale", LayerPinchable.simpleProperty("maxScale", Number.MAX_VALUE));
+	
+	  LayerPinchable.define("scaleFactor", LayerPinchable.simpleProperty("scaleFactor", 1));
+	
+	  LayerPinchable.define("rotate", LayerPinchable.simpleProperty("rotate", true));
+	
+	  LayerPinchable.define("rotateIncrements", LayerPinchable.simpleProperty("rotateIncrements", 0));
+	
+	  LayerPinchable.define("rotateMin", LayerPinchable.simpleProperty("rotateMin", 0));
+	
+	  LayerPinchable.define("rotateMax", LayerPinchable.simpleProperty("rotateMax", 0));
+	
+	  LayerPinchable.define("rotateFactor", LayerPinchable.simpleProperty("rotateFactor", 1));
+	
+	  function LayerPinchable(layer) {
+	    this.layer = layer;
+	    this._pinchEnd = bind(this._pinchEnd, this);
+	    this._pinch = bind(this._pinch, this);
+	    this._pinchStart = bind(this._pinchStart, this);
+	    this._centerOrigin = bind(this._centerOrigin, this);
+	    LayerPinchable.__super__.constructor.apply(this, arguments);
+	    this._attach();
+	  }
+	
+	  LayerPinchable.prototype._attach = function() {
+	    this.layer.on(Gestures.PinchStart, this._pinchStart);
+	    this.layer.on(Gestures.Pinch, this._pinch);
+	    this.layer.on(Gestures.PinchEnd, this._pinchEnd);
+	    return this.layer.on(Gestures.TapStart, this._tapStart);
+	  };
+	
+	  LayerPinchable.prototype._reset = function() {
+	    this._scaleStart = null;
+	    this._rotationStart = null;
+	    return this._rotationOffset = null;
+	  };
+	
+	  LayerPinchable.prototype._tapStart = function(event) {};
+	
+	  LayerPinchable.prototype._centerOrigin = function(event) {
+	    var originDelta, pinchLocation, topInSuperAfter, topInSuperBefore;
+	    topInSuperBefore = Utils.convertPoint({}, this.layer, this.layer.superLayer);
+	    pinchLocation = Utils.convertPointFromContext(event.touchCenter, this.layer, true, true);
+	    this.layer.originX = pinchLocation.x / this.layer.width;
+	    this.layer.originY = pinchLocation.y / this.layer.height;
+	    topInSuperAfter = Utils.convertPoint({}, this.layer, this.layer.superLayer);
+	    originDelta = {
+	      x: topInSuperAfter.x - topInSuperBefore.x,
+	      y: topInSuperAfter.y - topInSuperBefore.y
+	    };
+	    this.layer.x -= originDelta.x;
+	    return this.layer.y -= originDelta.y;
+	  };
+	
+	  LayerPinchable.prototype._pinchStart = function(event) {
+	    this._reset();
+	    if (this.centerOrigin) {
+	      this._centerOrigin(event);
+	    }
+	    return this.normalizeRotation = Utils.rotationNormalizer();
+	  };
+	
+	  LayerPinchable.prototype._pinch = function(event) {
+	    var pointA, pointB, rotation, scale;
+	    if (event.fingers !== 2) {
+	      return;
+	    }
+	    if (!this.enabled) {
+	      return;
+	    }
+	    pointA = {
+	      x: event.touches[0].pageX,
+	      y: event.touches[0].pageY
+	    };
+	    pointB = {
+	      x: event.touches[1].pageX,
+	      y: event.touches[1].pageY
+	    };
+	    if (!(Utils.pointTotal(Utils.pointAbs(Utils.pointSubtract(pointA, pointB))) > this.threshold)) {
+	      return;
+	    }
+	    if (this.scale) {
+	      if (this._scaleStart == null) {
+	        this._scaleStart = this.layer.scale;
+	      }
+	      scale = (((event.scale - 1) * this.scaleFactor) + 1) * this._scaleStart;
+	      if (this.minScale && this.maxScale) {
+	        scale = Utils.clamp(scale, this.minScale, this.maxScale);
+	      } else if (this.minScale) {
+	        scale = Utils.clamp(scale, this.minScale, 1000000);
+	      } else if (this.maxScale) {
+	        scale = Utils.clamp(scale, 0.00001, this.maxScale);
+	      }
+	      if (this.scaleIncrements) {
+	        scale = Utils.nearestIncrement(scale, this.scaleIncrements);
+	      }
+	      this.layer.scale = scale;
+	      this.emit(Events.Scale, event);
+	    }
+	    if (this.rotate) {
+	      if (this._rotationStart == null) {
+	        this._rotationStart = this.layer.rotation;
+	      }
+	      if (this._rotationOffset == null) {
+	        this._rotationOffset = event.rotation;
+	      }
+	      rotation = event.rotation - this._rotationOffset + this._rotationStart;
+	      rotation = rotation * this.rotateFactor;
+	      rotation = this.normalizeRotation(rotation);
+	      if (this.rotateMin && this.rotateMax) {
+	        rotation = Utils.clamp(rotation, this.rotateMin, this.rotateMax);
+	      }
+	      if (this.rotateIncrements) {
+	        rotation = Utils.nearestIncrement(rotation, this.rotateIncrements);
+	      }
+	      return this.layer.rotation = rotation;
+	    }
+	  };
+	
+	  LayerPinchable.prototype._pinchEnd = function(event) {
+	    return this._reset();
+	  };
+	
+	  return LayerPinchable;
+	
+	})(BaseClass);
+
+
+/***/ },
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Layer,
@@ -19431,7 +20858,7 @@
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
 	
-	Layer = __webpack_require__(12).Layer;
+	Layer = __webpack_require__(13).Layer;
 	
 	"Todo: make it work in a parent layer";
 	
@@ -19453,8 +20880,8 @@
 	  }
 	
 	  BackgroundLayer.prototype.layout = function() {
-	    if (this.superLayer) {
-	      return this.frame = this.superLayer.frame;
+	    if (this.parent) {
+	      return this.frame = this.parent.frame;
 	    } else {
 	      return this.frame = this._context.frame;
 	    }
@@ -19466,14 +20893,14 @@
 
 
 /***/ },
-/* 33 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Layer,
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty;
 	
-	Layer = __webpack_require__(12).Layer;
+	Layer = __webpack_require__(13).Layer;
 	
 	exports.VideoLayer = (function(superClass) {
 	  extend(VideoLayer, superClass);
@@ -19508,7 +20935,7 @@
 
 
 /***/ },
-/* 34 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var AnimationGroup, EventEmitter, _,
@@ -19569,7 +20996,7 @@
 
 
 /***/ },
-/* 35 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var BaseClass, CanvasClass, Events,
@@ -19579,7 +21006,7 @@
 	
 	BaseClass = __webpack_require__(6).BaseClass;
 	
-	Events = __webpack_require__(14).Events;
+	Events = __webpack_require__(15).Events;
 	
 	CanvasClass = (function(superClass) {
 	  extend(CanvasClass, superClass);
@@ -19621,6 +21048,28 @@
 	    }
 	  });
 	
+	  CanvasClass.define("backgroundColor", {
+	    importable: false,
+	    exportable: false,
+	    get: function() {
+	      return Framer.Device.background.backgroundColor;
+	    },
+	    set: function(value) {
+	      return Framer.Device.background.backgroundColor = value;
+	    }
+	  });
+	
+	  CanvasClass.define("image", {
+	    importable: false,
+	    exportable: false,
+	    get: function() {
+	      return Framer.Device.background.image;
+	    },
+	    set: function(value) {
+	      return Framer.Device.background.image = value;
+	    }
+	  });
+	
 	  CanvasClass.prototype.addListener = function(eventName, listener) {
 	    if (eventName === "resize") {
 	      Events.wrap(window).addEventListener("resize", (function(_this) {
@@ -19646,7 +21095,123 @@
 
 
 /***/ },
-/* 36 */
+/* 39 */
+/***/ function(module, exports) {
+
+	var bottom, center, left, right, top, wrapper;
+	
+	center = function(layer, property, offset) {
+	  var borderWidth, parent;
+	  if (offset == null) {
+	    offset = 0;
+	  }
+	  parent = Screen;
+	  if (layer.parent) {
+	    parent = layer.parent;
+	  }
+	  borderWidth = parent.borderWidth;
+	  if (borderWidth == null) {
+	    borderWidth = 0;
+	  }
+	  if (property === "x") {
+	    return (parent.width / 2) - (layer.width / 2) - borderWidth + offset;
+	  }
+	  if (property === "y") {
+	    return (parent.height / 2) - (layer.height / 2) - borderWidth + offset;
+	  }
+	  return 0;
+	};
+	
+	left = function(layer, property, offset) {
+	  var parent;
+	  if (offset == null) {
+	    offset = 0;
+	  }
+	  if (property !== "x") {
+	    throw Error("Align.left only works for x");
+	  }
+	  parent = Screen;
+	  if (layer.parent) {
+	    parent = layer.parent;
+	  }
+	  return 0 + offset;
+	};
+	
+	right = function(layer, property, offset) {
+	  var borderWidth, parent;
+	  if (offset == null) {
+	    offset = 0;
+	  }
+	  if (property !== "x") {
+	    throw Error("Align.right only works for x");
+	  }
+	  parent = Screen;
+	  if (layer.parent) {
+	    parent = layer.parent;
+	  }
+	  borderWidth = parent.borderWidth;
+	  if (borderWidth == null) {
+	    borderWidth = 0;
+	  }
+	  return parent.width - (2 * borderWidth) - layer.width + offset;
+	};
+	
+	top = function(layer, property, offset) {
+	  var parent;
+	  if (offset == null) {
+	    offset = 0;
+	  }
+	  if (property !== "y") {
+	    throw Error("Align.top only works for y");
+	  }
+	  parent = Screen;
+	  if (layer.parent) {
+	    parent = layer.parent;
+	  }
+	  return 0 + offset;
+	};
+	
+	bottom = function(layer, property, offset) {
+	  var borderWidth, parent;
+	  if (offset == null) {
+	    offset = 0;
+	  }
+	  if (property !== "y") {
+	    throw Error("Align.bottom only works for y");
+	  }
+	  parent = Screen;
+	  if (layer.parent) {
+	    parent = layer.parent;
+	  }
+	  borderWidth = parent.borderWidth;
+	  if (borderWidth == null) {
+	    borderWidth = 0;
+	  }
+	  return parent.height - (2 * borderWidth) - layer.height + offset;
+	};
+	
+	wrapper = function(f) {
+	  return function(a, b) {
+	    if ((a == null) || _.isNumber(a)) {
+	      return (function(l, p) {
+	        return f(l, p, a);
+	      });
+	    }
+	    return f(a, b, 0);
+	  };
+	};
+	
+	exports.Align = {
+	  center: wrapper(center),
+	  left: wrapper(left),
+	  right: wrapper(right),
+	  top: wrapper(top),
+	  bottom: wrapper(bottom)
+	};
+
+
+/***/ },
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Context, Utils, printContext, printLayer,
@@ -19654,7 +21219,7 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Context = __webpack_require__(37).Context;
+	Context = __webpack_require__(41).Context;
 	
 	"\nTodo:\n- Better looks\n- Resizable\n- Live in own space on top of all Framer stuff\n";
 	
@@ -19698,7 +21263,9 @@
 	    }
 	    printPrefix = "» ";
 	    printNode = document.createElement("div");
-	    printNode.innerHTML = _.escape(printPrefix + args.map(Utils.inspect).join(", ")) + "<br>";
+	    printNode.innerHTML = _.escape(printPrefix + args.map(function(obj) {
+	      return Utils.inspect(obj);
+	    }).join(", ")) + "<br>";
 	    printNode.style["-webkit-user-select"] = "text";
 	    printNode.style["cursor"] = "auto";
 	    return printLayer._element.appendChild(printNode);
@@ -19710,10 +21277,10 @@
 
 
 /***/ },
-/* 37 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var BaseClass, Config, DOMEventManager, Utils, _,
+	var BaseClass, Config, DOMEventManager, Defaults, Utils, _,
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty,
 	  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -19722,11 +21289,13 @@
 	
 	Utils = __webpack_require__(4);
 	
+	Config = __webpack_require__(14).Config;
+	
+	Defaults = __webpack_require__(17).Defaults;
+	
 	BaseClass = __webpack_require__(6).BaseClass;
 	
-	Config = __webpack_require__(13).Config;
-	
-	DOMEventManager = __webpack_require__(38).DOMEventManager;
+	DOMEventManager = __webpack_require__(42).DOMEventManager;
 	
 	
 	/*
@@ -19736,7 +21305,7 @@
 	a special context and replaces the default one (so it renders in the screen), and the print
 	function uses on to draw the console.
 	
-	The default context lives under Framer.DefaultContext and the current one in 
+	The default context lives under Framer.DefaultContext and the current one in
 	Framer.CurrentContext. You can create layers in any context by using the run function.
 	
 	A context keeps track of everyting around those layers, so it can clean it up again. We use
@@ -19770,16 +21339,16 @@
 	    if (options == null) {
 	      options = {};
 	    }
+	    options = Defaults.getDefaults("Context", options);
 	    Context.__super__.constructor.apply(this, arguments);
-	    options = _.defaults(options, {
-	      parent: null,
-	      name: null
-	    });
 	    if (!options.name) {
 	      throw Error("Contexts need a name");
 	    }
 	    this._parent = options.parent;
 	    this._name = options.name;
+	    this.perspective = options.perspective;
+	    this.perspectiveOriginX = options.perspectiveOriginX;
+	    this.perspectiveOriginY = options.perspectiveOriginY;
 	    this.reset();
 	  }
 	
@@ -19818,6 +21387,7 @@
 	  };
 	
 	  Context.prototype.resetLayers = function() {
+	    this.resetGestures();
 	    this._layers = [];
 	    return this._layerCounter = 0;
 	  };
@@ -19901,6 +21471,20 @@
 	    return this._intervals = [];
 	  };
 	
+	  Context.prototype.resetGestures = function() {
+	    var i, layer, len, ref;
+	    if (!this._layers) {
+	      return;
+	    }
+	    ref = this._layers;
+	    for (i = 0, len = ref.length; i < len; i++) {
+	      layer = ref[i];
+	      if (layer._gestures) {
+	        layer._gestures.destroy();
+	      }
+	    }
+	  };
+	
 	  Context.prototype.run = function(fn) {
 	    var previousContext;
 	    previousContext = Framer.CurrentContext;
@@ -19966,6 +21550,8 @@
 	    this._element = document.createElement("div");
 	    this._element.id = "FramerContextRoot-" + this._name;
 	    this._element.classList.add("framerContext");
+	    this._element.style["webkitPerspective"] = this.perspective;
+	    this._element.style["backgroundColor"] = this.backgroundColor;
 	    this.__pendingElementAppend = (function(_this) {
 	      return function() {
 	        var parentElement, ref;
@@ -19993,7 +21579,7 @@
 	
 	  Context.define("width", {
 	    get: function() {
-	      if (this.parent) {
+	      if (this.parent != null) {
 	        return this.parent.width;
 	      }
 	      return window.innerWidth;
@@ -20002,7 +21588,7 @@
 	
 	  Context.define("height", {
 	    get: function() {
-	      if (this.parent) {
+	      if (this.parent != null) {
 	        return this.parent.height;
 	      }
 	      return window.innerHeight;
@@ -20022,15 +21608,99 @@
 	
 	  Context.define("size", {
 	    get: function() {
-	      return _.pluck(this.frame, ["x", "y"]);
+	      return _.pick(this.frame, ["width", "height"]);
 	    }
 	  });
 	
 	  Context.define("point", {
 	    get: function() {
-	      return _.pluck(this.frame, ["width", "height"]);
+	      return _.pick(this.frame, ["x", "y"]);
 	    }
 	  });
+	
+	  Context.define("canvasFrame", {
+	    get: function() {
+	      if (this.parent == null) {
+	        return this.frame;
+	      }
+	      return this.parent.canvasFrame;
+	    }
+	  });
+	
+	  Context.define("backgroundColor", {
+	    get: function() {
+	      if (Color.isColor(this._backgroundColor)) {
+	        return this._backgroundColor;
+	      }
+	      return "transparent";
+	    },
+	    set: function(value) {
+	      var ref;
+	      if (Color.isColor(value)) {
+	        this._backgroundColor = value;
+	        return (ref = this._element) != null ? ref.style["backgroundColor"] = new Color(value.toString()) : void 0;
+	      }
+	    }
+	  });
+	
+	  Context.define("perspective", {
+	    get: function() {
+	      return this._perspective;
+	    },
+	    set: function(value) {
+	      var ref;
+	      if (_.isNumber(value)) {
+	        this._perspective = value;
+	        return (ref = this._element) != null ? ref.style["webkitPerspective"] = this._perspective : void 0;
+	      }
+	    }
+	  });
+	
+	  Context.prototype._updatePerspective = function() {
+	    var ref;
+	    return (ref = this._element) != null ? ref.style["webkitPerspectiveOrigin"] = (this.perspectiveOriginX * 100) + "% " + (this.perspectiveOriginY * 100) + "%" : void 0;
+	  };
+	
+	  Context.define("perspectiveOriginX", {
+	    get: function() {
+	      if (_.isNumber(this._perspectiveOriginX)) {
+	        return this._perspectiveOriginX;
+	      }
+	      return 0.5;
+	    },
+	    set: function(value) {
+	      if (_.isNumber(value)) {
+	        this._perspectiveOriginX = value;
+	        return this._updatePerspective();
+	      }
+	    }
+	  });
+	
+	  Context.define("perspectiveOriginY", {
+	    get: function() {
+	      if (_.isNumber(this._perspectiveOriginY)) {
+	        return this._perspectiveOriginY;
+	      }
+	      return .5;
+	    },
+	    set: function(value) {
+	      if (_.isNumber(value)) {
+	        this._perspectiveOriginY = value;
+	        return this._updatePerspective();
+	      }
+	    }
+	  });
+	
+	  Context.prototype.toInspect = function() {
+	    var round;
+	    round = function(value) {
+	      if (parseInt(value) === value) {
+	        return parseInt(value);
+	      }
+	      return Utils.round(value, 1);
+	    };
+	    return "<" + this.constructor.name + " id:" + this.id + " name:" + this._name + " " + (round(this.width)) + "x" + (round(this.height)) + ">";
+	  };
 	
 	  return Context;
 	
@@ -20038,7 +21708,7 @@
 
 
 /***/ },
-/* 38 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var DOMEventManagerElement, EventEmitter, EventManagerIdCounter, Utils, _,
@@ -20061,14 +21731,17 @@
 	    this.element = element1;
 	  }
 	
-	  DOMEventManagerElement.prototype.addListener = function(eventName, listener) {
+	  DOMEventManagerElement.prototype.addListener = function(eventName, listener, capture) {
+	    if (capture == null) {
+	      capture = false;
+	    }
 	    DOMEventManagerElement.__super__.addListener.call(this, eventName, listener);
-	    return this.element.addEventListener(eventName, listener);
+	    return this.element.addEventListener(eventName, listener, false);
 	  };
 	
 	  DOMEventManagerElement.prototype.removeListener = function(eventName, listener) {
 	    DOMEventManagerElement.__super__.removeListener.call(this, eventName, listener);
-	    return this.element.removeEventListener(eventName, listener);
+	    return this.element.removeEventListener(eventName, listener, false);
 	  };
 	
 	  DOMEventManagerElement.prototype.addEventListener = DOMEventManagerElement.prototype.addListener;
@@ -20112,7 +21785,7 @@
 
 
 /***/ },
-/* 39 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var EventMappers, Events, Layer, Utils, _, wrapComponent,
@@ -20126,9 +21799,9 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Layer = __webpack_require__(12).Layer;
+	Layer = __webpack_require__(13).Layer;
 	
-	Events = __webpack_require__(14).Events;
+	Events = __webpack_require__(15).Events;
 	
 	"ScrollComponent\n\ncontent <Layer>\ncontentSize <{width:n, height:n}>\ncontentInset <{top:n, right:n, bottom:n, left:n}> TODO\ncontentOffset <{x:n, y:n}> TODO\nscrollFrame <{x:n, y:n, width:n, height:n}>\nscrollPoint <{x:n, y:n}>\nscrollHorizontal <bool>\nscrollVertical <bool>\nspeedX <number>\nspeedY <number>\ndelaysContentTouches <bool> TODO\nloadPreset(<\"ios\"|\"android\">) TODO\nscrollToPoint(<{x:n, y:n}>, animate=true, animationOptions={})\nscrollToLayer(contentLayer, originX=0, originY=0)\nscrollFrameForContentLayer(<x:n, y:n>) <{x:n, y:n, width:n, height:n}> TODO\nclosestContentLayer(<x:n, y:n>) <Layer> TODO\n\nScrollComponent Events\n\n(all of the draggable events)\nScrollStart -> DragStart\nScrollWillMove -> DragWillMove\nScrollDidMove -> DragDidMove\nscroll -> DragMove (html compat)\nScrollEnd -> DragEnd";
 	
@@ -20154,11 +21827,11 @@
 	
 	EventMappers[Events.ScrollEnd] = Events.DragEnd;
 	
-	EventMappers[Events.ScrollAnimationDidStart] = Events.DragAnimationDidStart;
+	EventMappers[Events.ScrollAnimationDidStart] = Events.DragAnimationStart;
 	
-	EventMappers[Events.ScrollAnimationDidEnd] = Events.DragAnimationDidEnd;
+	EventMappers[Events.ScrollAnimationDidEnd] = Events.DragAnimationEnd;
 	
-	EventMappers[Events.DirectionLockDidStart] = Events.DirectionLockDidStart;
+	EventMappers[Events.DirectionLockStart] = Events.DirectionLockStart;
 	
 	exports.ScrollComponent = (function(superClass) {
 	  extend(ScrollComponent, superClass);
@@ -20218,7 +21891,7 @@
 	    this._contentInset = options.contentInset || Utils.rectZero();
 	    this.setContentLayer(new Layer);
 	    this._applyOptionsAndDefaults(options);
-	    this._enableMouseWheelHandling();
+	    this._enableMouseWheelHandling(options.mouseWheelEnabled);
 	    if (options.hasOwnProperty("wrap")) {
 	      wrapComponent(this, options.wrap);
 	    }
@@ -20226,6 +21899,9 @@
 	
 	  ScrollComponent.prototype.calculateContentFrame = function() {
 	    var contentFrame, size;
+	    if (!this.content) {
+	      return Utils.rectZero();
+	    }
 	    contentFrame = this.content.contentFrame();
 	    return size = {
 	      x: 0,
@@ -20240,12 +21916,12 @@
 	      this._content.destroy();
 	    }
 	    this._content = layer;
-	    this._content.superLayer = this;
+	    this._content.parent = this;
 	    this._content.name = "content";
-	    this._content.clip = false;
+	    this._content.clip = true;
 	    this._content.draggable.enabled = true;
 	    this._content.draggable.momentum = true;
-	    this._content.on("change:subLayers", this.updateContent);
+	    this._content.on("change:children", this.updateContent);
 	    this.on("change:width", this.updateContent);
 	    this.on("change:height", this.updateContent);
 	    this.updateContent();
@@ -20257,14 +21933,13 @@
 	  };
 	
 	  ScrollComponent.prototype.updateContent = function() {
-	    var constraintsFrame, contentFrame;
+	    var constraintsFrame, contentFrame, ref;
 	    if (!this.content) {
 	      return;
 	    }
 	    contentFrame = this.calculateContentFrame();
-	    contentFrame.x = contentFrame.x + this._contentInset.left;
-	    contentFrame.y = contentFrame.y + this._contentInset.top;
-	    this.content.frame = contentFrame;
+	    this.content.width = contentFrame.width;
+	    this.content.height = contentFrame.height;
 	    constraintsFrame = this.calculateContentFrame();
 	    constraintsFrame = {
 	      x: -constraintsFrame.width + this.width - this._contentInset.right,
@@ -20273,8 +21948,8 @@
 	      height: constraintsFrame.height + constraintsFrame.height - this.height + this._contentInset.top + this._contentInset.bottom
 	    };
 	    this.content.draggable.constraints = constraintsFrame;
-	    if (this.content.subLayers.length) {
-	      if (this.content.backgroundColor.isEqual(Framer.Defaults.Layer.backgroundColor)) {
+	    if (this.content.children.length) {
+	      if ((ref = this.content.backgroundColor) != null ? ref.isEqual(Framer.Defaults.Layer.backgroundColor) : void 0) {
 	        return this.content.backgroundColor = null;
 	      }
 	    }
@@ -20298,6 +21973,10 @@
 	
 	  ScrollComponent.prototype._calculateContentPoint = function(scrollPoint) {
 	    var point;
+	    scrollPoint = _.defaults(scrollPoint, {
+	      x: 0,
+	      y: 0
+	    });
 	    scrollPoint.x -= this.contentInset.left;
 	    scrollPoint.y -= this.contentInset.top;
 	    point = this._pointInConstraints(scrollPoint);
@@ -20381,7 +22060,15 @@
 	      return _.clone(this._contentInset);
 	    },
 	    set: function(contentInset) {
+	      var contentFrame;
 	      this._contentInset = Utils.rectZero(Utils.parseRect(contentInset));
+	      if (!this.content) {
+	        return;
+	      }
+	      contentFrame = this.calculateContentFrame();
+	      contentFrame.x = contentFrame.x + this._contentInset.left;
+	      contentFrame.y = contentFrame.y + this._contentInset.top;
+	      this.content.frame = contentFrame;
 	      return this.updateContent();
 	    }
 	  });
@@ -20478,10 +22165,10 @@
 	        curve: "spring(500,50,0)"
 	      };
 	    }
-	    if (contentLayer && contentLayer.superLayer !== this.content) {
-	      throw Error("This layer is not in the scroll component content");
+	    if (contentLayer && contentLayer.parent !== this.content) {
+	      throw Error("Can't scroll to this layer because it's not in the ScrollComponent. Add it to the content like layer.parent = scroll.content.");
 	    }
-	    if (!contentLayer || this.content.subLayers.length === 0) {
+	    if (!contentLayer || this.content.children.length === 0) {
 	      scrollPoint = {
 	        x: 0,
 	        y: 0
@@ -20568,7 +22255,7 @@
 	    if (originY == null) {
 	      originY = 0;
 	    }
-	    return Utils.frameSortByAbsoluteDistance(scrollPoint, this.content.subLayers, originX, originY);
+	    return Utils.frameSortByAbsoluteDistance(scrollPoint, this.content.children, originX, originY);
 	  };
 	
 	  ScrollComponent.prototype._pointInConstraints = function(point) {
@@ -20660,7 +22347,7 @@
 	  ScrollComponent.prototype.copy = function() {
 	    var contentLayer, copy;
 	    copy = ScrollComponent.__super__.copy.apply(this, arguments);
-	    contentLayer = _.first(_.without(copy.subLayers, copy.content));
+	    contentLayer = _.first(_.without(copy.children, copy.content));
 	    copy.setContentLayer(contentLayer);
 	    copy.props = this.props;
 	    return copy;
@@ -20675,60 +22362,66 @@
 	})(Layer);
 	
 	wrapComponent = function(instance, layer, options) {
-	  var i, j, len, len1, propKey, ref, ref1, screenFrame, scroll, subLayer, subLayerIndex, wrapper;
+	  var i, l, len, ref, ref1, screenFrame, scroll, wrapper;
 	  if (options == null) {
 	    options = {
 	      correct: true
 	    };
 	  }
+	  if (!(layer instanceof Layer)) {
+	    throw new Error("ScrollComponent.wrap expects a layer, not " + layer + ". Are you sure the layer exists?");
+	  }
 	  scroll = instance;
 	  if (options.correct === true) {
-	    if (layer.subLayers.length === 0) {
+	    if (layer.children.length === 0) {
 	      wrapper = new Layer;
 	      wrapper.name = "ScrollComponent";
 	      wrapper.frame = layer.frame;
-	      layer.superLayer = wrapper;
+	      layer.parent = wrapper;
 	      layer.x = layer.y = 0;
 	      layer = wrapper;
-	      console.log("Corrected the scroll component without sub layers");
 	    }
 	  }
-	  ref = ["frame", "image", "name"];
-	  for (i = 0, len = ref.length; i < len; i++) {
-	    propKey = ref[i];
-	    scroll[propKey] = layer[propKey];
+	  scroll.frame = layer.frame;
+	  scroll.parent = layer.parent;
+	  scroll.index = layer.index;
+	  if (layer.name && layer.name !== "") {
+	    scroll.name = layer.name;
+	  } else if ((ref = layer.__framerInstanceInfo) != null ? ref.name : void 0) {
+	    scroll.name = layer.__framerInstanceInfo.name;
+	  }
+	  if (layer.image) {
+	    scroll.image = layer.image;
+	    layer.image = null;
+	  }
+	  if (instance.constructor.name === "PageComponent") {
+	    ref1 = layer.children;
+	    for (i = 0, len = ref1.length; i < len; i++) {
+	      l = ref1[i];
+	      scroll.addPage(l);
+	    }
+	  } else {
+	    scroll.setContentLayer(layer);
 	  }
 	  if (options.correct === true) {
 	    screenFrame = scroll.screenFrame;
 	    if (screenFrame.x < Screen.width) {
 	      if (screenFrame.x + screenFrame.width > Screen.width) {
 	        scroll.width = Screen.width - screenFrame.x;
-	        console.log("Corrected the scroll width to " + scroll.width);
 	      }
 	    }
 	    if (screenFrame.y < Screen.height) {
 	      if (screenFrame.y + screenFrame.height > Screen.height) {
 	        scroll.height = Screen.height - screenFrame.y;
-	        console.log("Corrected the scroll height to " + scroll.height);
 	      }
 	    }
 	  }
-	  ref1 = layer.subLayers;
-	  for (j = 0, len1 = ref1.length; j < len1; j++) {
-	    subLayer = ref1[j];
-	    subLayerIndex = subLayer.index;
-	    subLayer.superLayer = scroll.content;
-	    subLayer.index = subLayerIndex;
-	  }
-	  scroll.superLayer = layer.superLayer;
-	  scroll.index = layer.index;
-	  layer.destroy();
 	  return scroll;
 	};
 
 
 /***/ },
-/* 40 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Events, ScrollComponent,
@@ -20737,9 +22430,9 @@
 	  hasProp = {}.hasOwnProperty,
 	  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 	
-	Events = __webpack_require__(14).Events;
+	Events = __webpack_require__(15).Events;
 	
-	ScrollComponent = __webpack_require__(39).ScrollComponent;
+	ScrollComponent = __webpack_require__(43).ScrollComponent;
 	
 	"PageComponent\n\noriginX <number>\noriginY <number>\n\nvelocityThreshold <number>\nanimationOptions <animationOptions={}>\ncurrentPage <Layer>\nclosestPage(<originX:n, originY:n>) <Layer>\n\nnextPage(direction=\"\", currentPage)\nsnapToNextPage(direction=\"\", animate, animationOptions={})\n";
 	
@@ -20759,18 +22452,18 @@
 	  function PageComponent() {
 	    this._resetHistory = bind(this._resetHistory, this);
 	    this._scrollEnd = bind(this._scrollEnd, this);
-	    this._onAminationEnd = bind(this._onAminationEnd, this);
-	    this._onAminationStep = bind(this._onAminationStep, this);
-	    this._onAminationStart = bind(this._onAminationStart, this);
+	    this._onAnimationStop = bind(this._onAnimationStop, this);
+	    this._onAnimationStep = bind(this._onAnimationStep, this);
+	    this._onAnimationStart = bind(this._onAnimationStart, this);
 	    this._scrollMove = bind(this._scrollMove, this);
 	    this._scrollStart = bind(this._scrollStart, this);
 	    PageComponent.__super__.constructor.apply(this, arguments);
 	    this.content.draggable.momentum = false;
 	    this.content.draggable.bounce = false;
-	    this.on(Events.ScrollStart, this._scrollStart);
-	    this.on(Events.ScrollEnd, this._scrollEnd);
+	    this.content.on(Events.DragSessionStart, this._scrollStart);
+	    this.content.on(Events.DragSessionEnd, this._scrollEnd);
 	    this.content.on("change:frame", _.debounce(this._scrollMove, 16));
-	    this.content.on("change:subLayers", this._resetHistory);
+	    this.content.on("change:children", this._resetHistory);
 	    this._resetHistory();
 	  }
 	
@@ -20820,16 +22513,16 @@
 	      };
 	    }
 	    if (direction === "up" || direction === "top" || direction === "north") {
-	      layers = this.content.subLayersAbove(point, this.originX, this.originY);
+	      layers = this.content.childrenAbove(point, this.originX, this.originY);
 	    }
 	    if (direction === "down" || direction === "bottom" || direction === "south") {
-	      layers = this.content.subLayersBelow(point, this.originX, this.originY);
+	      layers = this.content.childrenBelow(point, this.originX, this.originY);
 	    }
 	    if (direction === "left" || direction === "west") {
-	      layers = this.content.subLayersLeft(point, this.originX, this.originY);
+	      layers = this.content.childrenLeft(point, this.originX, this.originY);
 	    }
 	    if (direction === "right" || direction === "east") {
-	      layers = this.content.subLayersRight(point, this.originX, this.originY);
+	      layers = this.content.childrenRight(point, this.originX, this.originY);
 	    }
 	    if (withoutCurrentPage) {
 	      layers = _.without(layers, currentPage);
@@ -20893,7 +22586,7 @@
 	      throw new Error(direction + " should be in " + directions);
 	    }
 	    point = page.point;
-	    if (this.content.subLayers.length) {
+	    if (this.content.children.length) {
 	      if (direction === "right" || direction === "east") {
 	        point.x = Utils.frameGetMaxX(this.content.contentFrame());
 	      }
@@ -20902,8 +22595,8 @@
 	      }
 	    }
 	    page.point = point;
-	    if (page.superLayer !== this.content) {
-	      return page.superLayer = this.content;
+	    if (page.parent !== this.content) {
+	      return page.parent = this.content;
 	    } else {
 	      return this.updateContent();
 	    }
@@ -20911,23 +22604,23 @@
 	
 	  PageComponent.prototype.setContentLayer = function(contentLayer) {
 	    if (this.content) {
-	      this._onAminateStop();
-	      this.content.off(Events.AnimationStart, this._onAminationStart);
-	      this.content.off(Events.AnimationStop, this._onAminationEnd);
+	      this._onAnimationStop();
+	      this.content.off(Events.AnimationStart, this._onAnimationStart);
+	      this.content.off(Events.AnimationStop, this._onAnimationStop);
 	    }
 	    PageComponent.__super__.setContentLayer.call(this, contentLayer);
-	    this.content.on(Events.AnimationStart, this._onAminationStart);
-	    return this.content.on(Events.AnimationStop, this._onAminationEnd);
+	    this.content.on(Events.AnimationStart, this._onAnimationStart);
+	    return this.content.on(Events.AnimationStop, this._onAnimationStop);
 	  };
 	
 	  PageComponent.prototype.horizontalPageIndex = function(page) {
-	    return (_.sortBy(this.content.subLayers, function(l) {
+	    return (_.sortBy(this.content.children, function(l) {
 	      return l.x;
 	    })).indexOf(page);
 	  };
 	
 	  PageComponent.prototype.verticalPageIndex = function(page) {
-	    return (_.sortBy(this.content.subLayers, function(l) {
+	    return (_.sortBy(this.content.children, function(l) {
 	      return l.y;
 	    })).indexOf(page);
 	  };
@@ -20948,36 +22641,35 @@
 	    }
 	  };
 	
-	  PageComponent.prototype._onAminationStart = function() {
+	  PageComponent.prototype._onAnimationStart = function() {
 	    this._isMoving = true;
 	    this._isAnimating = true;
-	    return this.content.on("change:frame", this._onAminationStep);
+	    return this.content.on("change:frame", this._onAnimationStep);
 	  };
 	
-	  PageComponent.prototype._onAminationStep = function() {
+	  PageComponent.prototype._onAnimationStep = function() {
 	    return this.emit(Events.Move, this.content.point);
 	  };
 	
-	  PageComponent.prototype._onAminationEnd = function() {
+	  PageComponent.prototype._onAnimationStop = function() {
 	    this._isMoving = false;
 	    this._isAnimating = false;
-	    return this.content.off("change:frame", this._onAminationStep);
+	    return this.content.off("change:frame", this._onAnimationStep);
 	  };
 	
 	  PageComponent.prototype._scrollEnd = function() {
-	    var end, nextPage, start, velocity, xDisabled, xLock, yDisabled, yLock;
+	    var maximumVelocity, nextPage, velocity, xDisabled, xLock, yDisabled, yLock;
+	    if (this.content.isAnimating) {
+	      return;
+	    }
 	    velocity = this.content.draggable.velocity;
 	    xDisabled = !this.scrollHorizontal && (this.direction === "right" || this.direction === "left");
 	    yDisabled = !this.scrollVertical && (this.direction === "down" || this.direction === "up");
 	    xLock = this.content.draggable._directionLockEnabledX && (this.direction === "right" || this.direction === "left");
 	    yLock = this.content.draggable._directionLockEnabledY && (this.direction === "down" || this.direction === "up");
-	    if (Math.max(Math.abs(velocity.x), Math.abs(velocity.y)) < this.velocityThreshold || xLock || yLock || xDisabled || yDisabled) {
-	      start = this.content.draggable._layerStartPoint;
-	      end = this.content.draggable.layer.point;
-	      if (start.x !== end.x || start.y !== end.y) {
-	        this.snapToPage(this.closestPage, true, this.animationOptions);
-	      }
-	      return;
+	    maximumVelocity = Math.max(Math.abs(velocity.x), Math.abs(velocity.y));
+	    if (maximumVelocity < this.velocityThreshold || xLock || yLock || xDisabled || yDisabled) {
+	      return this.snapToPage(this.closestPage, true, this.animationOptions);
 	    }
 	    nextPage = this.nextPage(this.direction, this._currentPage, false);
 	    if (nextPage == null) {
@@ -21005,21 +22697,36 @@
 
 
 /***/ },
-/* 41 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Events, Layer, Utils,
-	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+	var Events, Knob, Layer, Utils,
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-	  hasProp = {}.hasOwnProperty;
+	  hasProp = {}.hasOwnProperty,
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 	
 	Utils = __webpack_require__(4);
 	
-	Layer = __webpack_require__(12).Layer;
+	Layer = __webpack_require__(13).Layer;
 	
-	Events = __webpack_require__(14).Events;
+	Events = __webpack_require__(15).Events;
 	
 	"SliderComponent\n\nknob <layer>\nknobSize <width, height>\nfill <layer>\nmin <number>\nmax <number>\n\npointForValue(<n>)\nvalueForPoint(<n>)\n\nanimateToValue(value, animationOptions={})";
+	
+	Events.SliderValueChange = "sliderValueChange";
+	
+	Knob = (function(superClass) {
+	  extend(Knob, superClass);
+	
+	  function Knob(options) {
+	    Knob.__super__.constructor.call(this, options);
+	  }
+	
+	  Knob.define("constrained", Knob.simpleProperty("constrained", false));
+	
+	  return Knob;
+	
+	})(Layer);
 	
 	exports.SliderComponent = (function(superClass) {
 	  extend(SliderComponent, superClass);
@@ -21033,26 +22740,21 @@
 	    this._updateFrame = bind(this._updateFrame, this);
 	    this._updateKnob = bind(this._updateKnob, this);
 	    this._updateFill = bind(this._updateFill, this);
-	    this._touchDown = bind(this._touchDown, this);
-	    if (options.backgroundColor == null) {
-	      options.backgroundColor = "#ccc";
+	    this._touchEnd = bind(this._touchEnd, this);
+	    this._touchStart = bind(this._touchStart, this);
+	    _.defaults(options, {
+	      backgroundColor: "#ccc",
+	      borderRadius: 50,
+	      clip: false,
+	      width: 300,
+	      height: 10,
+	      value: 0,
+	      knobSize: 30
+	    });
+	    if (options.hitArea == null) {
+	      options.hitArea = options.knobSize;
 	    }
-	    if (options.borderRadius == null) {
-	      options.borderRadius = 50;
-	    }
-	    if (options.clip == null) {
-	      options.clip = false;
-	    }
-	    if (options.width == null) {
-	      options.width = 300;
-	    }
-	    if (options.height == null) {
-	      options.height = 10;
-	    }
-	    if (options.value == null) {
-	      options.value = 0;
-	    }
-	    this.knob = new Layer({
+	    this.knob = new Knob({
 	      backgroundColor: "#fff",
 	      shadowY: 1,
 	      shadowBlur: 3,
@@ -21065,15 +22767,19 @@
 	      force2d: true,
 	      name: "fill"
 	    });
+	    this.sliderOverlay = new Layer({
+	      backgroundColor: null,
+	      name: "sliderOverlay"
+	    });
 	    SliderComponent.__super__.constructor.call(this, options);
-	    this.knobSize = options.knobSize || 30;
-	    this.knob.superLayer = this.fill.superLayer = this;
+	    this.knobSize = options.knobSize;
+	    this.knob.parent = this.fill.parent = this.sliderOverlay.parent = this;
 	    if (this.width > this.height) {
 	      this.fill.height = this.height;
 	    } else {
 	      this.fill.width = this.width;
 	    }
-	    this.fill.borderRadius = this.borderRadius;
+	    this.fill.borderRadius = this.sliderOverlay.borderRadius = this.borderRadius;
 	    this.knob.draggable.enabled = true;
 	    this.knob.draggable.overdrag = false;
 	    this.knob.draggable.momentum = true;
@@ -21082,33 +22788,22 @@
 	      tolerance: 0.25
 	    };
 	    this.knob.draggable.bounce = false;
-	    this.knob.draggable.propagateEvents = false;
+	    this.knob.borderRadius = this.knobSize / 2;
 	    this._updateFrame();
 	    this._updateKnob();
 	    this._updateFill();
-	    this.on("change:size", this._updateFrame);
+	    this.on("change:frame", this._updateFrame);
 	    this.on("change:borderRadius", this._setRadius);
-	    if (this.width > this.height) {
-	      this.knob.draggable.speedY = 0;
-	      this.knob.on("change:x", this._updateFill);
-	    } else {
-	      this.knob.draggable.speedX = 0;
-	      this.knob.on("change:y", this._updateFill);
-	    }
 	    this.knob.on("change:size", this._updateKnob);
-	    this.knob.on(Events.Move, (function(_this) {
-	      return function() {
-	        _this._updateFrame();
-	        return _this._updateValue();
-	      };
-	    })(this));
-	    this.on(Events.TouchStart, this._touchDown);
+	    this.knob.on("change:frame", this._updateFill);
+	    this.knob.on("change:frame", this._updateValue);
+	    this.sliderOverlay.on(Events.TapStart, this._touchStart);
+	    this.sliderOverlay.on(Events.TapEnd, this._touchEnd);
 	  }
 	
-	  SliderComponent.prototype._touchDown = function(event) {
+	  SliderComponent.prototype._touchStart = function(event) {
 	    var offsetX, offsetY;
 	    event.preventDefault();
-	    event.stopPropagation();
 	    offsetX = (this.min / this.canvasScaleX()) - this.min;
 	    offsetY = (this.min / this.canvasScaleY()) - this.min;
 	    if (this.width > this.height) {
@@ -21117,6 +22812,10 @@
 	      this.value = this.valueForPoint(Events.touchEvent(event).clientY - this.screenScaledFrame().y) / this.canvasScaleY() - offsetY;
 	    }
 	    this.knob.draggable._touchStart(event);
+	    return this._updateValue();
+	  };
+	
+	  SliderComponent.prototype._touchEnd = function(event) {
 	    return this._updateValue();
 	  };
 	
@@ -21145,13 +22844,27 @@
 	      width: this.width + this.knob.width,
 	      height: this.height + this.knob.height
 	    };
+	    if (this.knob.constrained) {
+	      this.knob.draggable.constraints = {
+	        x: 0,
+	        y: 0,
+	        width: this.width,
+	        height: this.height
+	      };
+	    }
 	    if (this.width > this.height) {
 	      this.fill.height = this.height;
-	      return this.knob.centerY();
+	      this.knob.centerY();
 	    } else {
 	      this.fill.width = this.width;
-	      return this.knob.centerX();
+	      this.knob.centerX();
 	    }
+	    if (this.width > this.height) {
+	      this.knob.draggable.speedY = 0;
+	    } else {
+	      this.knob.draggable.speedX = 0;
+	    }
+	    return this.sliderOverlay.center();
 	  };
 	
 	  SliderComponent.prototype._setRadius = function() {
@@ -21168,8 +22881,23 @@
 	      this._knobSize = value;
 	      this.knob.width = this._knobSize;
 	      this.knob.height = this._knobSize;
-	      this.knob.borderRadius = this.knobSize / 2;
 	      return this._updateFrame();
+	    }
+	  });
+	
+	  SliderComponent.define("hitArea", {
+	    get: function() {
+	      return this._hitArea;
+	    },
+	    set: function(value) {
+	      this._hitArea = value;
+	      if (this.width > this.height) {
+	        this.sliderOverlay.width = this.width + this.hitArea;
+	        return this.sliderOverlay.height = this.hitArea;
+	      } else {
+	        this.sliderOverlay.width = this.hitArea;
+	        return this.sliderOverlay.height = this.height + this.hitArea;
+	      }
 	    }
 	  });
 	
@@ -21202,31 +22930,52 @@
 	    set: function(value) {
 	      if (this.width > this.height) {
 	        this.knob.midX = this.pointForValue(value);
-	        return this._updateFill();
 	      } else {
 	        this.knob.midY = this.pointForValue(value);
-	        return this._updateFill();
 	      }
+	      this._updateFill();
+	      return this._updateValue();
 	    }
 	  });
 	
 	  SliderComponent.prototype._updateValue = function() {
-	    return this.emit("change:value", this.value);
+	    if (this._lastUpdatedValue === this.value) {
+	      return;
+	    }
+	    this._lastUpdatedValue = this.value;
+	    this.emit("change:value", this.value);
+	    return this.emit(Events.SliderValueChange, this.value);
 	  };
 	
 	  SliderComponent.prototype.pointForValue = function(value) {
 	    if (this.width > this.height) {
-	      return Utils.modulate(value, [this.min, this.max], [0, this.width], true);
+	      if (this.knob.constrained) {
+	        return Utils.modulate(value, [this.min, this.max], [0 + (this.knob.width / 2), this.width - (this.knob.width / 2)], true);
+	      } else {
+	        return Utils.modulate(value, [this.min, this.max], [0, this.width], true);
+	      }
 	    } else {
-	      return Utils.modulate(value, [this.min, this.max], [0, this.height], true);
+	      if (this.knob.constrained) {
+	        return Utils.modulate(value, [this.min, this.max], [0 + (this.knob.height / 2), this.height - (this.knob.height / 2)], true);
+	      } else {
+	        return Utils.modulate(value, [this.min, this.max], [0, this.height], true);
+	      }
 	    }
 	  };
 	
 	  SliderComponent.prototype.valueForPoint = function(value) {
 	    if (this.width > this.height) {
-	      return Utils.modulate(value, [0, this.width], [this.min, this.max], true);
+	      if (this.knob.constrained) {
+	        return Utils.modulate(value, [0 + (this.knob.width / 2), this.width - (this.knob.width / 2)], [this.min, this.max], true);
+	      } else {
+	        return Utils.modulate(value, [0, this.width], [this.min, this.max], true);
+	      }
 	    } else {
-	      return Utils.modulate(value, [0, this.height], [this.min, this.max], true);
+	      if (this.knob.constrained) {
+	        return Utils.modulate(value, [0 + (this.knob.height / 2), this.height - (this.knob.height / 2)], [this.min, this.max], true);
+	      } else {
+	        return Utils.modulate(value, [0, this.height], [this.min, this.max], true);
+	      }
 	    }
 	  };
 	
@@ -21240,14 +22989,16 @@
 	      animationOptions.properties = {
 	        x: this.pointForValue(value) - (this.knob.width / 2)
 	      };
-	      this.knob.on("change:x", this._updateValue);
 	    } else {
 	      animationOptions.properties = {
 	        y: this.pointForValue(value) - (this.knob.height / 2)
 	      };
-	      this.knob.on("change:y", this._updateValue);
 	    }
 	    return this.knob.animate(animationOptions);
+	  };
+	
+	  SliderComponent.prototype.onValueChange = function(cb) {
+	    return this.on(Events.SliderValueChange, cb);
 	  };
 	
 	  return SliderComponent;
@@ -21256,10 +23007,10 @@
 
 
 /***/ },
-/* 42 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var AppleWatch38Device, AppleWatch42Device, BaseClass, BuiltInDevices, Defaults, DeviceComponentDefaultDevice, Devices, Events, Layer, Nexus5BaseDevice, Nexus5BaseDeviceHand, Nexus9BaseDevice, Utils, _, iPadAirBaseDevice, iPadAirBaseDeviceHand, iPadMiniBaseDevice, iPadMiniBaseDeviceHand, iPhone5BaseDevice, iPhone5BaseDeviceHand, iPhone5CBaseDevice, iPhone5CBaseDeviceHand, iPhone6BaseDevice, iPhone6BaseDeviceHand, iPhone6PlusBaseDevice, iPhone6PlusBaseDeviceHand,
+	var AppleWatch38BlackLeatherDevice, AppleWatch38Device, AppleWatch42Device, BaseClass, BuiltInDevices, Defaults, Devices, Events, HTCa9BaseDevice, HTCm8BaseDevice, Layer, MSFTLumia950BaseDevice, Nexus4BaseDevice, Nexus5BaseDevice, Nexus6BaseDevice, Nexus9BaseDevice, SamsungGalaxyNote5BaseDevice, Utils, _, iPadAir2BaseDevice, iPadMini4BaseDevice, iPadProBaseDevice, iPhone5BaseDevice, iPhone5CBaseDevice, iPhone6BaseDevice, iPhone6PlusBaseDevice, newDeviceMinVersion, oldDeviceMaxVersion, old_AppleWatch38Device, old_AppleWatch42Device, old_Nexus5BaseDevice, old_Nexus5BaseDeviceHand, old_Nexus9BaseDevice, old_iPadAirBaseDevice, old_iPadAirBaseDeviceHand, old_iPadMiniBaseDevice, old_iPadMiniBaseDeviceHand, old_iPhone5BaseDevice, old_iPhone5BaseDeviceHand, old_iPhone5CBaseDevice, old_iPhone5CBaseDeviceHand, old_iPhone6BaseDevice, old_iPhone6BaseDeviceHand, old_iPhone6PlusBaseDevice, old_iPhone6PlusBaseDeviceHand,
 	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
 	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
 	  hasProp = {}.hasOwnProperty,
@@ -21269,15 +23020,13 @@
 	
 	_ = __webpack_require__(1)._;
 	
-	DeviceComponentDefaultDevice = "iphone-6-silver";
-	
 	BaseClass = __webpack_require__(6).BaseClass;
 	
-	Layer = __webpack_require__(12).Layer;
+	Layer = __webpack_require__(13).Layer;
 	
-	Defaults = __webpack_require__(15).Defaults;
+	Defaults = __webpack_require__(17).Defaults;
 	
-	Events = __webpack_require__(14).Events;
+	Events = __webpack_require__(15).Events;
 	
 	
 	/*
@@ -21298,18 +23047,11 @@
 	Device.setDeviceScale(zoom:float, animate:bool)
 	Device.setContentScale(zoom:float, animate:bool)
 	
-	Device.keyboard bool
-	Device.setKeyboard(visible:bool, animate:bool)
-	Device.showKeyboard(animate:bool)
-	Device.hideKeyboard(animate:bool)
-	Device.toggleKeyboard(animate:bool)
-	
+	Device.nextHand()
 	
 	 * Events
 	Events.DeviceTypeDidChange
 	Events.DeviceFullScreenDidChange
-	Events.DeviceKeyboardWillShow
-	Events.DeviceKeyboardDidShow
 	 */
 	
 	exports.DeviceComponent = (function(superClass) {
@@ -21326,7 +23068,7 @@
 	    if (options == null) {
 	      options = {};
 	    }
-	    this._animateKeyboard = bind(this._animateKeyboard, this);
+	    this._orientationChange = bind(this._orientationChange, this);
 	    this._updateDeviceImage = bind(this._updateDeviceImage, this);
 	    this._update = bind(this._update, this);
 	    defaults = Defaults.getDefaults("DeviceComponent", options);
@@ -21337,6 +23079,7 @@
 	    this.animationOptions = defaults.animationOptions;
 	    this.deviceType = defaults.deviceType;
 	    _.extend(this, _.defaults(options, defaults));
+	    window.addEventListener("orientationchange", this._orientationChange, true);
 	  }
 	
 	  DeviceComponent.prototype._setup = function() {
@@ -21349,37 +23092,38 @@
 	    this.background.clip = true;
 	    this.background.backgroundColor = "transparent";
 	    this.background.classList.add("DeviceBackground");
-	    this.phone = new Layer;
+	    this.hands = new Layer;
+	    this.handsImageLayer = new Layer({
+	      parent: this.hands
+	    });
+	    this.phone = new Layer({
+	      parent: this.hands
+	    });
 	    this.screen = new Layer({
-	      superLayer: this.phone
+	      parent: this.phone
 	    });
 	    this.viewport = new Layer({
-	      superLayer: this.screen
+	      parent: this.screen
 	    });
 	    this.content = new Layer({
-	      superLayer: this.viewport
+	      parent: this.viewport
 	    });
+	    this.hands.backgroundColor = "transparent";
+	    this.hands._alwaysUseImageCache = true;
+	    this.handsImageLayer.backgroundColor = "transparent";
 	    this.phone.backgroundColor = "transparent";
 	    this.phone.classList.add("DevicePhone");
-	    this.screen.backgroundColor = "transparent";
 	    this.screen.classList.add("DeviceScreen");
+	    this.screen.clip = true;
 	    this.viewport.backgroundColor = "transparent";
 	    this.viewport.classList.add("DeviceComponentPort");
 	    this.content.backgroundColor = "transparent";
 	    this.content.classList.add("DeviceContent");
 	    this.content.originX = 0;
 	    this.content.originY = 0;
-	    this.keyboardLayer = new Layer({
-	      superLayer: this.viewport
-	    });
-	    this.keyboardLayer.on("click", (function(_this) {
-	      return function() {
-	        return _this.toggleKeyboard();
-	      };
-	    })(this));
-	    this.keyboardLayer.classList.add("DeviceKeyboard");
-	    this.keyboardLayer.backgroundColor = "transparent";
-	    Framer.CurrentContext.domEventManager.wrap(window).addEventListener("resize", this._update);
+	    if (!Utils.isMobile()) {
+	      Framer.CurrentContext.domEventManager.wrap(window).addEventListener("resize", this._update);
+	    }
 	    ref = [this.background, this.phone, this.viewport, this.content, this.screen];
 	    for (i = 0, len = ref.length; i < len; i++) {
 	      layer = ref[i];
@@ -21387,10 +23131,11 @@
 	        return event.preventDefault();
 	      });
 	    }
-	    return this._context = new Framer.Context({
+	    this._context = new Framer.Context({
 	      parent: this.content,
 	      name: "Device"
 	    });
+	    return this._context.perspective = 1200;
 	  };
 	
 	  DeviceComponent.prototype._update = function() {
@@ -21400,7 +23145,7 @@
 	      contentScaleFactor = 1;
 	    }
 	    if (this._shouldRenderFullScreen()) {
-	      ref = [this.background, this.phone, this.viewport, this.content, this.screen];
+	      ref = [this.background, this.hands, this.phone, this.viewport, this.content, this.screen];
 	      for (i = 0, len = ref.length; i < len; i++) {
 	        layer = ref[i];
 	        layer.x = layer.y = 0;
@@ -21408,22 +23153,25 @@
 	        layer.height = window.innerHeight / contentScaleFactor;
 	        layer.scale = 1;
 	      }
-	      this.content.scale = contentScaleFactor;
-	      return this._positionKeyboard();
+	      return this.content.scale = contentScaleFactor;
 	    } else {
 	      backgroundOverlap = 100;
 	      this.background.x = 0 - backgroundOverlap;
 	      this.background.y = 0 - backgroundOverlap;
 	      this.background.width = window.innerWidth + (2 * backgroundOverlap);
 	      this.background.height = window.innerHeight + (2 * backgroundOverlap);
-	      this.phone.scale = this._calculatePhoneScale();
+	      this.hands.scale = this._calculatePhoneScale();
+	      this.hands.center();
 	      this.phone.center();
 	      ref1 = this._getOrientationDimensions(this._device.screenWidth / contentScaleFactor, this._device.screenHeight / contentScaleFactor), width = ref1[0], height = ref1[1];
-	      this.screen.width = this._device.screenWidth;
-	      this.screen.height = this._device.screenHeight;
-	      this.viewport.width = this.content.width = width;
-	      this.viewport.height = this.content.height = height;
-	      return this.screen.center();
+	      this.screen.width = this.viewport.width = this._device.screenWidth;
+	      this.screen.height = this.viewport.height = this._device.screenHeight;
+	      this.content.width = width;
+	      this.content.height = height;
+	      this.screen.center();
+	      if (this.selectedHand && this._orientation === 0) {
+	        return this.setHand(this.selectedHand);
+	      }
 	    }
 	  };
 	
@@ -21475,12 +23223,11 @@
 	    this._fullScreen = fullScreen;
 	    if (fullScreen === true) {
 	      this.phone.image = "";
+	      this.hands.image = "";
 	    } else {
 	      this._updateDeviceImage();
 	    }
 	    this._update();
-	    this.keyboard = false;
-	    this._positionKeyboard();
 	    return this.emit("change:fullScreen");
 	  };
 	
@@ -21489,13 +23236,21 @@
 	      return this._deviceType;
 	    },
 	    set: function(deviceType) {
-	      var device, shouldZoomToFit;
+	      var device, i, key, lDevicetype, lKey, len, ref, shouldZoomToFit;
 	      if (deviceType === this._deviceType) {
 	        return;
 	      }
 	      device = null;
 	      if (_.isString(deviceType)) {
-	        device = Devices[deviceType.toLowerCase()];
+	        lDevicetype = deviceType.toLowerCase();
+	        ref = _.keys(Devices);
+	        for (i = 0, len = ref.length; i < len; i++) {
+	          key = ref[i];
+	          lKey = key.toLowerCase();
+	          if (lDevicetype === lKey) {
+	            device = Devices[key];
+	          }
+	        }
 	      }
 	      if (!device) {
 	        throw Error("No device named " + deviceType + ". Options are: " + (_.keys(Devices)));
@@ -21504,13 +23259,15 @@
 	        return;
 	      }
 	      shouldZoomToFit = this._deviceType === "fullscreen";
+	      this.screen.backgroundColor = "black";
+	      if (device.backgroundColor != null) {
+	        this.screen.backgroundColor = device.backgroundColor;
+	      }
 	      this._device = _.clone(device);
 	      this._deviceType = deviceType;
 	      this.fullscreen = false;
 	      this._updateDeviceImage();
 	      this._update();
-	      this.keyboard = false;
-	      this._positionKeyboard();
 	      this.emit("change:deviceType");
 	      if (shouldZoomToFit) {
 	        return this.deviceScale = "fit";
@@ -21523,14 +23280,17 @@
 	      return;
 	    }
 	    if (this._shouldRenderFullScreen()) {
-	      return this.phone.image = "";
+	      this.phone.image = "";
+	      return this.hands.image = "";
 	    } else if (!this._deviceImageUrl(this._deviceImageName())) {
 	      return this.phone.image = "";
 	    } else {
 	      this.phone._alwaysUseImageCache = true;
 	      this.phone.image = this._deviceImageUrl(this._deviceImageName());
 	      this.phone.width = this._device.deviceImageWidth;
-	      return this.phone.height = this._device.deviceImageHeight;
+	      this.phone.height = this._device.deviceImageHeight;
+	      this.hands.width = this.phone.width;
+	      return this.hands.height = this.phone.height;
 	    }
 	  };
 	
@@ -21554,7 +23314,11 @@
 	    }
 	    resourceUrl = "//resources.framerjs.com/static/DeviceResources";
 	    if (Utils.isFramerStudio() && window.FramerStudioInfo) {
-	      resourceUrl = window.FramerStudioInfo.deviceImagesUrl;
+	      if (this._device.minStudioVersion && Utils.framerStudioVersion() >= this._device.minStudioVersion || !this._device.minStudioVersion) {
+	        if (this._device.maxStudioVersion && Utils.framerStudioVersion() <= this._device.maxStudioVersion || !this._device.maxStudioVersion) {
+	          resourceUrl = window.FramerStudioInfo.deviceImagesUrl;
+	        }
+	      }
 	    }
 	    if (Utils.isJP2Supported() && this._device.deviceImageJP2 === true) {
 	      return resourceUrl + "/" + (name.replace(".png", ".jp2"));
@@ -21596,28 +23360,32 @@
 	    } else {
 	      phoneScale = deviceScale;
 	    }
-	    this.phone.animateStop();
+	    this.hands.animateStop();
 	    if (animate) {
-	      this.phone.animate(_.extend(this.animationOptions, {
+	      this.hands.animate(_.extend(this.animationOptions, {
 	        properties: {
 	          scale: phoneScale
 	        }
 	      }));
 	    } else {
-	      this.phone.scale = phoneScale;
-	      this.phone.center();
+	      this.hands.scale = phoneScale;
+	      this.hands.center();
 	    }
 	    return this.emit("change:deviceScale");
 	  };
 	
 	  DeviceComponent.prototype._calculatePhoneScale = function() {
 	    var height, paddingOffset, phoneScale, ref, ref1, width;
-	    if (this._deviceScale && this._deviceScale !== "fit") {
-	      return this._deviceScale;
-	    }
 	    ref = this._getOrientationDimensions(this.phone.width, this.phone.height), width = ref[0], height = ref[1];
 	    paddingOffset = ((ref1 = this._device) != null ? ref1.paddingOffset : void 0) || 0;
 	    phoneScale = _.min([(window.innerWidth - ((this.padding + paddingOffset) * 2)) / width, (window.innerHeight - ((this.padding + paddingOffset) * 2)) / height]);
+	    if (phoneScale > 1) {
+	      phoneScale = 1;
+	    }
+	    this.emit("change:phoneScale", phoneScale);
+	    if (this._deviceScale && this._deviceScale !== "fit") {
+	      return this._deviceScale;
+	    }
 	    return phoneScale;
 	  };
 	
@@ -21657,6 +23425,9 @@
 	
 	  DeviceComponent.define("orientation", {
 	    get: function() {
+	      if (Utils.isMobile()) {
+	        return window.orientation;
+	      }
 	      return this._orientation || 0;
 	    },
 	    set: function(orientation) {
@@ -21665,9 +23436,12 @@
 	  });
 	
 	  DeviceComponent.prototype.setOrientation = function(orientation, animate) {
-	    var _hadKeyboard, animation, contentProperties, height, phoneProperties, ref, ref1, width, x, y;
+	    var animation, contentProperties, height, offset, phoneProperties, ref, ref1, width, x, y;
 	    if (animate == null) {
 	      animate = false;
+	    }
+	    if (Utils.framerStudioVersion() === oldDeviceMaxVersion) {
+	      orientation *= -1;
 	    }
 	    if (orientation === "portrait") {
 	      orientation = 0;
@@ -21687,26 +23461,30 @@
 	    }
 	    this._orientation = orientation;
 	    phoneProperties = {
-	      rotationZ: this._orientation,
+	      rotationZ: -this._orientation,
 	      scale: this._calculatePhoneScale()
 	    };
 	    ref = this._getOrientationDimensions(this._device.screenWidth, this._device.screenHeight), width = ref[0], height = ref[1];
-	    ref1 = [(this.screen.width - width) / 2, (this.screen.height - height) / 2], x = ref1[0], y = ref1[1];
+	    this.content.width = width;
+	    this.content.height = height;
+	    offset = (this.screen.width - width) / 2;
+	    if (this._orientation === -90) {
+	      offset *= -1;
+	    }
+	    ref1 = [0, 0], x = ref1[0], y = ref1[1];
+	    if (this.isLandscape()) {
+	      x = offset;
+	      y = offset;
+	    }
 	    contentProperties = {
-	      rotationZ: -this._orientation,
-	      width: width,
-	      height: height,
+	      rotationZ: this._orientation,
 	      x: x,
 	      y: y
 	    };
-	    _hadKeyboard = this.keyboard;
-	    if (_hadKeyboard) {
-	      this.hideKeyboard(false);
-	    }
-	    this.phone.animateStop();
+	    this.hands.animateStop();
 	    this.viewport.animateStop();
 	    if (animate) {
-	      animation = this.phone.animate(_.extend(this.animationOptions, {
+	      animation = this.hands.animate(_.extend(this.animationOptions, {
 	        properties: phoneProperties
 	      }));
 	      this.viewport.animate(_.extend(this.animationOptions, {
@@ -21717,27 +23495,25 @@
 	          return _this._update();
 	        };
 	      })(this));
-	      if (_hadKeyboard) {
-	        animation.on(Events.AnimationEnd, (function(_this) {
-	          return function() {
-	            return _this.showKeyboard(true);
-	          };
-	        })(this));
-	      }
 	    } else {
-	      this.phone.props = phoneProperties;
+	      this.hands.props = phoneProperties;
 	      this.viewport.props = contentProperties;
 	      this._update();
-	      if (_hadKeyboard) {
-	        this.showKeyboard(true);
-	      }
 	    }
-	    this._renderKeyboard();
-	    return this.emit("change:orientation");
+	    if (this._orientation !== 0) {
+	      this.handsImageLayer.image = "";
+	    }
+	    return this.emit("change:orientation", this._orientation);
+	  };
+	
+	  DeviceComponent.prototype._orientationChange = function() {
+	    this._orientation = window.orientation;
+	    this._update();
+	    return this.emit("change:orientation", window.orientation);
 	  };
 	
 	  DeviceComponent.prototype.isPortrait = function() {
-	    return Math.abs(this._orientation) !== 90;
+	    return Math.abs(this.orientation) === 0;
 	  };
 	
 	  DeviceComponent.prototype.isLandscape = function() {
@@ -21786,267 +23562,606 @@
 	    }
 	  };
 	
-	  DeviceComponent.define("keyboard", {
-	    get: function() {
-	      return this._keyboard;
-	    },
-	    set: function(keyboard) {
-	      return this.setKeyboard(keyboard, false);
-	    }
-	  });
+	  DeviceComponent.prototype.handSwitchingSupported = function() {
+	    return this._device.hands !== void 0;
+	  };
 	
-	  DeviceComponent.prototype.setKeyboard = function(keyboard, animate) {
-	    var ref, ref1;
-	    if (animate == null) {
-	      animate = false;
-	    }
-	    if (!this._device.hasOwnProperty("keyboards")) {
+	  DeviceComponent.prototype.nextHand = function() {
+	    var hand, hands, nextHand, nextHandIndex;
+	    if (this.hands.rotationZ !== 0) {
 	      return;
 	    }
-	    if (_.isString(keyboard)) {
-	      if ((ref = keyboard.toLowerCase()) === "1" || ref === "true") {
-	        keyboard = true;
-	      } else if ((ref1 = keyboard.toLowerCase()) === "0" || ref1 === "false") {
-	        keyboard = false;
-	      } else {
-	        return;
+	    if (this.handSwitchingSupported()) {
+	      hands = _.keys(this._device.hands);
+	      if (hands.length > 0) {
+	        nextHandIndex = hands.indexOf(this.selectedHand) + 1;
+	        nextHand = "";
+	        if (nextHandIndex < hands.length) {
+	          nextHand = hands[nextHandIndex];
+	        }
+	        hand = this.setHand(nextHand);
+	        this._update();
+	        return hand;
 	      }
 	    }
-	    if (!_.isBoolean(keyboard)) {
-	      return;
+	    return false;
+	  };
+	
+	  DeviceComponent.prototype.setHand = function(hand) {
+	    var handData;
+	    this.selectedHand = hand;
+	    if (!hand || !this.handSwitchingSupported()) {
+	      return this.handsImageLayer.image = "";
 	    }
-	    if (keyboard === this._keyboard) {
-	      return;
-	    }
-	    this._keyboard = keyboard;
-	    this.emit("change:keyboard");
-	    if (keyboard === true) {
-	      this.emit("keyboard:show:start");
-	      return this._animateKeyboard(this._keyboardShowY(), animate, (function(_this) {
-	        return function() {
-	          return _this.emit("keyboard:show:end");
-	        };
-	      })(this));
-	    } else {
-	      this.emit("keyboard:hide:start");
-	      return this._animateKeyboard(this._keyboardHideY(), animate, (function(_this) {
-	        return function() {
-	          return _this.emit("keyboard:hide:end");
-	        };
-	      })(this));
+	    handData = this._device.hands[hand];
+	    if (handData) {
+	      this.hands.width = handData.width;
+	      this.hands.height = handData.height;
+	      this.hands.center();
+	      this.phone.center();
+	      this.handsImageLayer.size = this.hands.size;
+	      this.handsImageLayer.y = 0;
+	      if (handData.offset) {
+	        this.handsImageLayer.y = handData.offset;
+	      }
+	      this.handsImageLayer.image = this.handImageUrl(hand);
+	      return hand;
 	    }
 	  };
 	
-	  DeviceComponent.prototype.showKeyboard = function(animate) {
-	    if (animate == null) {
-	      animate = true;
+	  DeviceComponent.prototype.handImageUrl = function(hand) {
+	    var resourceUrl;
+	    resourceUrl = "//resources.framerjs.com/static/DeviceResources";
+	    if (Utils.isFramerStudio() && window.FramerStudioInfo && Utils.framerStudioVersion() >= newDeviceMinVersion) {
+	      resourceUrl = window.FramerStudioInfo.deviceImagesUrl;
 	    }
-	    return this.setKeyboard(true, animate);
-	  };
-	
-	  DeviceComponent.prototype.hideKeyboard = function(animate) {
-	    if (animate == null) {
-	      animate = true;
-	    }
-	    return this.setKeyboard(false, animate);
-	  };
-	
-	  DeviceComponent.prototype.toggleKeyboard = function(animate) {
-	    if (animate == null) {
-	      animate = true;
-	    }
-	    return this.setKeyboard(!this.keyboard, animate);
-	  };
-	
-	  DeviceComponent.prototype._renderKeyboard = function() {
-	    if (!this._device.keyboards) {
-	      return;
-	    }
-	    this.keyboardLayer.image = this._deviceImageUrl(this._device.keyboards[this.orientationName].image);
-	    this.keyboardLayer.width = this._device.keyboards[this.orientationName].width;
-	    return this.keyboardLayer.height = this._device.keyboards[this.orientationName].height;
-	  };
-	
-	  DeviceComponent.prototype._positionKeyboard = function() {
-	    this.keyboardLayer.centerX();
-	    if (this.keyboard) {
-	      return this._animateKeyboard(this._keyboardShowY(), false);
-	    } else {
-	      return this._animateKeyboard(this._keyboardHideY(), false);
-	    }
-	  };
-	
-	  DeviceComponent.prototype._animateKeyboard = function(y, animate, callback) {
-	    var animation;
-	    this.keyboardLayer.bringToFront();
-	    this.keyboardLayer.animateStop();
-	    if (animate === false) {
-	      this.keyboardLayer.y = y;
-	      return typeof callback === "function" ? callback() : void 0;
-	    } else {
-	      animation = this.keyboardLayer.animate(_.extend(this.animationOptions, {
-	        properties: {
-	          y: y
-	        }
-	      }));
-	      return animation.on(Events.AnimationEnd, callback);
-	    }
-	  };
-	
-	  DeviceComponent.prototype._keyboardShowY = function() {
-	    return this.viewport.height - this.keyboardLayer.height;
-	  };
-	
-	  DeviceComponent.prototype._keyboardHideY = function() {
-	    return this.viewport.height;
+	    return resourceUrl + "/" + hand + ".png";
 	  };
 	
 	  return DeviceComponent;
 	
 	})(BaseClass);
 	
+	newDeviceMinVersion = 53;
+	
+	oldDeviceMaxVersion = 52;
+	
+	iPadAir2BaseDevice = {
+	  deviceImageWidth: 1856,
+	  deviceImageHeight: 2608,
+	  deviceImageJP2: true,
+	  screenWidth: 1536,
+	  screenHeight: 2048,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion
+	};
+	
+	iPadMini4BaseDevice = {
+	  deviceImageWidth: 1936,
+	  deviceImageHeight: 2688,
+	  deviceImageJP2: true,
+	  screenWidth: 1536,
+	  screenHeight: 2048,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion
+	};
+	
+	iPadProBaseDevice = {
+	  deviceImageWidth: 2448,
+	  deviceImageHeight: 3432,
+	  deviceImageJP2: true,
+	  screenWidth: 2048,
+	  screenHeight: 2732,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion
+	};
+	
 	iPhone6BaseDevice = {
+	  deviceImageWidth: 874,
+	  deviceImageHeight: 1792,
+	  deviceImageJP2: true,
+	  screenWidth: 750,
+	  screenHeight: 1334,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion,
+	  hands: {
+	    "iphone-hands-2": {
+	      width: 2400,
+	      height: 3740
+	    },
+	    "iphone-hands-1": {
+	      width: 2400,
+	      height: 3740
+	    }
+	  }
+	};
+	
+	iPhone6PlusBaseDevice = {
+	  deviceImageWidth: 1452,
+	  deviceImageHeight: 2968,
+	  deviceImageJP2: true,
+	  screenWidth: 1242,
+	  screenHeight: 2208,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion,
+	  hands: {
+	    "iphone-hands-2": {
+	      width: 3987,
+	      height: 6212
+	    },
+	    "iphone-hands-1": {
+	      width: 3987,
+	      height: 6212
+	    }
+	  }
+	};
+	
+	iPhone5BaseDevice = {
+	  deviceImageWidth: 768,
+	  deviceImageHeight: 1612,
+	  deviceImageJP2: true,
+	  screenWidth: 640,
+	  screenHeight: 1136,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion,
+	  hands: {
+	    "iphone-hands-2": {
+	      width: 2098,
+	      height: 3269,
+	      offset: 19
+	    },
+	    "iphone-hands-1": {
+	      width: 2098,
+	      height: 3269,
+	      offset: 19
+	    }
+	  }
+	};
+	
+	iPhone5CBaseDevice = {
+	  deviceImageWidth: 776,
+	  deviceImageHeight: 1620,
+	  deviceImageJP2: true,
+	  screenWidth: 640,
+	  screenHeight: 1136,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion,
+	  hands: {
+	    "iphone-hands-2": {
+	      width: 2098,
+	      height: 3269,
+	      offset: 28
+	    },
+	    "iphone-hands-1": {
+	      width: 2098,
+	      height: 3269,
+	      offset: 28
+	    }
+	  }
+	};
+	
+	Nexus4BaseDevice = {
+	  deviceImageWidth: 860,
+	  deviceImageHeight: 1668,
+	  deviceImageJP2: true,
+	  screenWidth: 768,
+	  screenHeight: 1280,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion,
+	  hands: {
+	    "iphone-hands-2": {
+	      width: 2362,
+	      height: 3681,
+	      offset: -52
+	    },
+	    "iphone-hands-1": {
+	      width: 2362,
+	      height: 3681,
+	      offset: -52
+	    }
+	  }
+	};
+	
+	Nexus5BaseDevice = {
+	  deviceImageWidth: 1204,
+	  deviceImageHeight: 2432,
+	  deviceImageJP2: true,
+	  screenWidth: 1080,
+	  screenHeight: 1920,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion,
+	  hands: {
+	    "iphone-hands-2": {
+	      width: 3292,
+	      height: 5130,
+	      offset: 8
+	    },
+	    "iphone-hands-1": {
+	      width: 3292,
+	      height: 5130,
+	      offset: 8
+	    }
+	  }
+	};
+	
+	Nexus6BaseDevice = {
+	  deviceImageWidth: 1576,
+	  deviceImageHeight: 3220,
+	  deviceImageJP2: true,
+	  screenWidth: 1440,
+	  screenHeight: 2560,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion,
+	  hands: {
+	    "iphone-hands-2": {
+	      width: 4304,
+	      height: 6707,
+	      offset: 8
+	    },
+	    "iphone-hands-1": {
+	      width: 4304,
+	      height: 6707,
+	      offset: 8
+	    }
+	  }
+	};
+	
+	Nexus9BaseDevice = {
+	  deviceImageWidth: 1896,
+	  deviceImageHeight: 2648,
+	  deviceImageJP2: true,
+	  screenWidth: 1536,
+	  screenHeight: 2048,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion
+	};
+	
+	HTCa9BaseDevice = {
+	  deviceImageWidth: 1252,
+	  deviceImageHeight: 2592,
+	  deviceImageJP2: true,
+	  screenWidth: 1080,
+	  screenHeight: 1920,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion,
+	  hands: {
+	    "iphone-hands-2": {
+	      width: 3436,
+	      height: 5354,
+	      offset: 36
+	    },
+	    "iphone-hands-1": {
+	      width: 3436,
+	      height: 5354,
+	      offset: 36
+	    }
+	  }
+	};
+	
+	HTCm8BaseDevice = {
+	  deviceImageWidth: 1232,
+	  deviceImageHeight: 2572,
+	  deviceImageJP2: true,
+	  screenWidth: 1080,
+	  screenHeight: 1920,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion,
+	  hands: {
+	    "iphone-hands-2": {
+	      width: 3436,
+	      height: 5354,
+	      offset: 12
+	    },
+	    "iphone-hands-1": {
+	      width: 3436,
+	      height: 5354,
+	      offset: 12
+	    }
+	  }
+	};
+	
+	MSFTLumia950BaseDevice = {
+	  deviceImageWidth: 1660,
+	  deviceImageHeight: 3292,
+	  deviceImageJP2: true,
+	  screenWidth: 1440,
+	  screenHeight: 2560,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion,
+	  hands: {
+	    "iphone-hands-2": {
+	      width: 4494,
+	      height: 7003,
+	      offset: -84
+	    },
+	    "iphone-hands-1": {
+	      width: 4494,
+	      height: 7003,
+	      offset: -84
+	    }
+	  }
+	};
+	
+	SamsungGalaxyNote5BaseDevice = {
+	  deviceImageWidth: 1572,
+	  deviceImageHeight: 3140,
+	  deviceImageJP2: true,
+	  screenWidth: 1440,
+	  screenHeight: 2560,
+	  deviceType: "phone",
+	  minStudioVersion: newDeviceMinVersion,
+	  hands: {
+	    "iphone-hands-2": {
+	      width: 4279,
+	      height: 6668,
+	      offset: -24
+	    },
+	    "iphone-hands-1": {
+	      width: 4279,
+	      height: 6668,
+	      offset: -84
+	    }
+	  }
+	};
+	
+	AppleWatch42Device = {
+	  deviceImageWidth: 512,
+	  deviceImageHeight: 990,
+	  deviceImageJP2: true,
+	  screenWidth: 312,
+	  screenHeight: 390,
+	  minStudioVersion: newDeviceMinVersion
+	};
+	
+	AppleWatch38Device = {
+	  deviceImageWidth: 472,
+	  deviceImageHeight: 772,
+	  deviceImageJP2: true,
+	  screenWidth: 272,
+	  screenHeight: 340,
+	  minStudioVersion: newDeviceMinVersion
+	};
+	
+	AppleWatch38BlackLeatherDevice = {
+	  deviceImageWidth: 472,
+	  deviceImageHeight: 796,
+	  deviceImageJP2: true,
+	  screenWidth: 272,
+	  screenHeight: 340,
+	  minStudioVersion: newDeviceMinVersion
+	};
+	
+	old_iPhone6BaseDevice = {
 	  deviceImageWidth: 870,
 	  deviceImageHeight: 1738,
 	  deviceImageJP2: true,
 	  screenWidth: 750,
 	  screenHeight: 1334,
-	  deviceType: "phone"
+	  deviceType: "phone",
+	  maxStudioVersion: oldDeviceMaxVersion
 	};
 	
-	iPhone6BaseDeviceHand = _.extend({}, iPhone6BaseDevice, {
+	old_iPhone6BaseDeviceHand = _.extend({}, old_iPhone6BaseDevice, {
 	  deviceImageWidth: 1988,
 	  deviceImageHeight: 2368,
 	  deviceImageJP2: true,
-	  paddingOffset: -150
+	  paddingOffset: -150,
+	  maxStudioVersion: oldDeviceMaxVersion
 	});
 	
-	iPhone6PlusBaseDevice = {
+	old_iPhone6PlusBaseDevice = {
 	  deviceImageWidth: 1460,
 	  deviceImageHeight: 2900,
 	  deviceImageJP2: true,
 	  screenWidth: 1242,
 	  screenHeight: 2208,
-	  deviceType: "phone"
+	  deviceType: "phone",
+	  maxStudioVersion: oldDeviceMaxVersion
 	};
 	
-	iPhone6PlusBaseDeviceHand = _.extend({}, iPhone6PlusBaseDevice, {
+	old_iPhone6PlusBaseDeviceHand = _.extend({}, old_iPhone6PlusBaseDevice, {
 	  deviceImageWidth: 3128,
 	  deviceImageHeight: 3487,
 	  deviceImageJP2: true,
-	  paddingOffset: -150
+	  paddingOffset: -150,
+	  maxStudioVersion: oldDeviceMaxVersion
 	});
 	
-	iPhone5BaseDevice = {
+	old_iPhone5BaseDevice = {
 	  deviceImageWidth: 780,
 	  deviceImageHeight: 1608,
 	  deviceImageJP2: true,
 	  screenWidth: 640,
 	  screenHeight: 1136,
-	  deviceType: "phone"
+	  deviceType: "phone",
+	  maxStudioVersion: oldDeviceMaxVersion
 	};
 	
-	iPhone5BaseDeviceHand = _.extend({}, iPhone5BaseDevice, {
+	old_iPhone5BaseDeviceHand = _.extend({}, old_iPhone5BaseDevice, {
 	  deviceImageWidth: 1884,
 	  deviceImageHeight: 2234,
 	  deviceImageJP2: true,
-	  paddingOffset: -200
+	  paddingOffset: -200,
+	  maxStudioVersion: oldDeviceMaxVersion
 	});
 	
-	iPhone5CBaseDevice = {
+	old_iPhone5CBaseDevice = {
 	  deviceImageWidth: 776,
 	  deviceImageHeight: 1612,
 	  deviceImageJP2: true,
 	  screenWidth: 640,
 	  screenHeight: 1136,
-	  deviceType: "phone"
+	  deviceType: "phone",
+	  maxStudioVersion: oldDeviceMaxVersion
 	};
 	
-	iPhone5CBaseDeviceHand = _.extend({}, iPhone5CBaseDevice, {
+	old_iPhone5CBaseDeviceHand = _.extend({}, old_iPhone5CBaseDevice, {
 	  deviceImageWidth: 1894,
 	  deviceImageHeight: 2244,
 	  deviceImageJP2: true,
-	  paddingOffset: -200
+	  paddingOffset: -200,
+	  maxStudioVersion: oldDeviceMaxVersion
 	});
 	
-	iPadMiniBaseDevice = {
+	old_iPadMiniBaseDevice = {
 	  deviceImageWidth: 872,
 	  deviceImageHeight: 1292,
 	  deviceImageJP2: true,
 	  screenWidth: 768,
 	  screenHeight: 1024,
-	  deviceType: "tablet"
+	  deviceType: "tablet",
+	  maxStudioVersion: oldDeviceMaxVersion
 	};
 	
-	iPadMiniBaseDeviceHand = _.extend({}, iPadMiniBaseDevice, {
+	old_iPadMiniBaseDeviceHand = _.extend({}, old_iPadMiniBaseDevice, {
 	  deviceImageWidth: 1380,
 	  deviceImageHeight: 2072,
 	  deviceImageJP2: true,
-	  paddingOffset: -120
+	  paddingOffset: -120,
+	  maxStudioVersion: oldDeviceMaxVersion
 	});
 	
-	iPadAirBaseDevice = {
+	old_iPadAirBaseDevice = {
 	  deviceImageWidth: 1769,
 	  deviceImageHeight: 2509,
 	  deviceImageJP2: true,
 	  screenWidth: 1536,
 	  screenHeight: 2048,
-	  deviceType: "tablet"
+	  deviceType: "tablet",
+	  maxStudioVersion: oldDeviceMaxVersion
 	};
 	
-	iPadAirBaseDeviceHand = _.extend({}, iPadAirBaseDevice, {
+	old_iPadAirBaseDeviceHand = _.extend({}, old_iPadAirBaseDevice, {
 	  deviceImageWidth: 4744,
 	  deviceImageHeight: 4101,
 	  deviceImageJP2: true,
-	  paddingOffset: -120
+	  paddingOffset: -120,
+	  maxStudioVersion: oldDeviceMaxVersion
 	});
 	
-	Nexus5BaseDevice = {
+	old_Nexus5BaseDevice = {
 	  deviceImageWidth: 1208,
 	  deviceImageHeight: 2440,
 	  deviceImageJP2: true,
 	  screenWidth: 1080,
 	  screenHeight: 1920,
-	  deviceType: "phone"
+	  deviceType: "phone",
+	  maxStudioVersion: oldDeviceMaxVersion
 	};
 	
-	Nexus5BaseDeviceHand = _.extend({}, Nexus5BaseDevice, {
+	old_Nexus5BaseDeviceHand = _.extend({}, old_Nexus5BaseDevice, {
 	  deviceImageWidth: 2692,
 	  deviceImageHeight: 2996,
 	  deviceImageJP2: true,
-	  paddingOffset: -120
+	  paddingOffset: -120,
+	  maxStudioVersion: oldDeviceMaxVersion
 	});
 	
-	Nexus9BaseDevice = {
+	old_Nexus9BaseDevice = {
 	  deviceImageWidth: 1733,
 	  deviceImageHeight: 2575,
 	  deviceImageJP2: true,
 	  screenWidth: 1536,
 	  screenHeight: 2048,
-	  deviceType: "tablet"
+	  deviceType: "tablet",
+	  maxStudioVersion: oldDeviceMaxVersion
 	};
 	
-	AppleWatch42Device = {
+	old_AppleWatch42Device = {
 	  deviceImageWidth: 552,
 	  deviceImageHeight: 938,
 	  deviceImageJP2: true,
 	  screenWidth: 312,
-	  screenHeight: 390
+	  screenHeight: 390,
+	  maxStudioVersion: oldDeviceMaxVersion
 	};
 	
-	AppleWatch38Device = {
+	old_AppleWatch38Device = {
 	  deviceImageWidth: 508,
 	  deviceImageHeight: 900,
 	  deviceImageJP2: true,
 	  screenWidth: 272,
-	  screenHeight: 340
+	  screenHeight: 340,
+	  maxStudioVersion: oldDeviceMaxVersion
 	};
 	
 	Devices = {
 	  "fullscreen": {
 	    name: "Fullscreen",
-	    deviceType: "desktop"
+	    deviceType: "desktop",
+	    backgroundColor: "white"
 	  },
+	  "apple-ipad-air-2-silver": _.clone(iPadAir2BaseDevice),
+	  "apple-ipad-air-2-gold": _.clone(iPadAir2BaseDevice),
+	  "apple-ipad-air-2-space-gray": _.clone(iPadAir2BaseDevice),
+	  "apple-ipad-mini-4-silver": _.clone(iPadMini4BaseDevice),
+	  "apple-ipad-mini-4-gold": _.clone(iPadMini4BaseDevice),
+	  "apple-ipad-mini-4-space-gray": _.clone(iPadMini4BaseDevice),
+	  "apple-ipad-pro-silver": _.clone(iPadProBaseDevice),
+	  "apple-ipad-pro-gold": _.clone(iPadProBaseDevice),
+	  "apple-ipad-pro-space-gray": _.clone(iPadProBaseDevice),
+	  "apple-iphone-6s-gold": _.clone(iPhone6BaseDevice),
+	  "apple-iphone-6s-rose-gold": _.clone(iPhone6BaseDevice),
+	  "apple-iphone-6s-silver": _.clone(iPhone6BaseDevice),
+	  "apple-iphone-6s-space-gray": _.clone(iPhone6BaseDevice),
+	  "apple-iphone-6s-plus-gold": _.clone(iPhone6PlusBaseDevice),
+	  "apple-iphone-6s-plus-rose-gold": _.clone(iPhone6PlusBaseDevice),
+	  "apple-iphone-6s-plus-silver": _.clone(iPhone6PlusBaseDevice),
+	  "apple-iphone-6s-plus-space-gray": _.clone(iPhone6PlusBaseDevice),
+	  "apple-iphone-5s-gold": _.clone(iPhone5BaseDevice),
+	  "apple-iphone-5s-silver": _.clone(iPhone5BaseDevice),
+	  "apple-iphone-5s-space-gray": _.clone(iPhone5BaseDevice),
+	  "apple-iphone-5c-blue": _.clone(iPhone5CBaseDevice),
+	  "apple-iphone-5c-green": _.clone(iPhone5CBaseDevice),
+	  "apple-iphone-5c-red": _.clone(iPhone5CBaseDevice),
+	  "apple-iphone-5c-white": _.clone(iPhone5CBaseDevice),
+	  "apple-iphone-5c-yellow": _.clone(iPhone5CBaseDevice),
+	  "apple-watch-38mm-gold-black-leather-closed": _.clone(AppleWatch38BlackLeatherDevice),
+	  "apple-watch-38mm-rose-gold-black-leather-closed": _.clone(AppleWatch38BlackLeatherDevice),
+	  "apple-watch-38mm-stainless-steel-black-leather-closed": _.clone(AppleWatch38BlackLeatherDevice),
+	  "apple-watch-38mm-black-steel-black-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-38mm-gold-midnight-blue-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-38mm-rose-gold-lavender-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-38mm-sport-aluminum-blue-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-38mm-sport-aluminum-fog-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-38mm-sport-aluminum-green-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-38mm-sport-aluminum-red-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-38mm-sport-aluminum-walnut-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-38mm-sport-aluminum-white-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-38mm-sport-aluminum-gold-antique-white-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-38mm-sport-aluminum-rose-gold-stone-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-38mm-sport-space-gray-black-closed": _.clone(AppleWatch38Device),
+	  "apple-watch-42mm-black-steel-black-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-gold-black-leather-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-gold-midnight-blue-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-rose-gold-black-leather-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-rose-gold-lavender-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-sport-aluminum-blue-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-sport-aluminum-fog-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-sport-aluminum-green-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-sport-aluminum-red-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-sport-aluminum-walnut-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-sport-aluminum-white-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-sport-aluminum-gold-antique-white-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-sport-aluminum-rose-gold-stone-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-sport-space-gray-black-closed": _.clone(AppleWatch42Device),
+	  "apple-watch-42mm-stainless-steel-black-leather-closed": _.clone(AppleWatch42Device),
+	  "google-nexus-4": _.clone(Nexus4BaseDevice),
+	  "google-nexus-5x": _.clone(Nexus5BaseDevice),
+	  "google-nexus-6p": _.clone(Nexus6BaseDevice),
+	  "google-nexus-9": _.clone(Nexus9BaseDevice),
+	  "htc-one-a9-black": _.clone(HTCa9BaseDevice),
+	  "htc-one-a9-white": _.clone(HTCa9BaseDevice),
+	  "htc-one-m8-black": _.clone(HTCm8BaseDevice),
+	  "htc-one-m8-gold": _.clone(HTCm8BaseDevice),
+	  "htc-one-m8-silver": _.clone(HTCm8BaseDevice),
+	  "microsoft-lumia-950-black": _.clone(MSFTLumia950BaseDevice),
+	  "microsoft-lumia-950-white": _.clone(MSFTLumia950BaseDevice),
+	  "samsung-galaxy-note-5-black": _.clone(SamsungGalaxyNote5BaseDevice),
+	  "samsung-galaxy-note-5-gold": _.clone(SamsungGalaxyNote5BaseDevice),
+	  "samsung-galaxy-note-5-pink": _.clone(SamsungGalaxyNote5BaseDevice),
+	  "samsung-galaxy-note-5-silver-titanium": _.clone(SamsungGalaxyNote5BaseDevice),
+	  "samsung-galaxy-note-5-white": _.clone(SamsungGalaxyNote5BaseDevice),
 	  "desktop-safari-1024-600": {
 	    deviceType: "browser",
 	    name: "Desktop Safari 1024 x 600",
@@ -22054,7 +24169,8 @@
 	    screenHeight: 600,
 	    deviceImageWidth: 1136,
 	    deviceImageHeight: 760,
-	    deviceImageJP2: true
+	    deviceImageJP2: true,
+	    backgroundColor: "white"
 	  },
 	  "desktop-safari-1280-800": {
 	    deviceType: "browser",
@@ -22063,7 +24179,8 @@
 	    screenHeight: 800,
 	    deviceImageWidth: 1392,
 	    deviceImageHeight: 960,
-	    deviceImageJP2: true
+	    deviceImageJP2: true,
+	    backgroundColor: "white"
 	  },
 	  "desktop-safari-1440-900": {
 	    deviceType: "browser",
@@ -22072,71 +24189,72 @@
 	    screenHeight: 900,
 	    deviceImageWidth: 1552,
 	    deviceImageHeight: 1060,
-	    deviceImageJP2: true
+	    deviceImageJP2: true,
+	    backgroundColor: "white"
 	  },
-	  "iphone-6-spacegray": _.clone(iPhone6BaseDevice),
-	  "iphone-6-spacegray-hand": _.clone(iPhone6BaseDeviceHand),
-	  "iphone-6-silver": _.clone(iPhone6BaseDevice),
-	  "iphone-6-silver-hand": _.clone(iPhone6BaseDeviceHand),
-	  "iphone-6-gold": _.clone(iPhone6BaseDevice),
-	  "iphone-6-gold-hand": _.clone(iPhone6BaseDeviceHand),
-	  "iphone-6plus-spacegray": _.clone(iPhone6PlusBaseDevice),
-	  "iphone-6plus-spacegray-hand": _.clone(iPhone6PlusBaseDeviceHand),
-	  "iphone-6plus-silver": _.clone(iPhone6PlusBaseDevice),
-	  "iphone-6plus-silver-hand": _.clone(iPhone6PlusBaseDeviceHand),
-	  "iphone-6plus-gold": _.clone(iPhone6PlusBaseDevice),
-	  "iphone-6plus-gold-hand": _.clone(iPhone6PlusBaseDeviceHand),
-	  "iphone-5s-spacegray": _.clone(iPhone5BaseDevice),
-	  "iphone-5s-spacegray-hand": _.clone(iPhone5BaseDeviceHand),
-	  "iphone-5s-silver": _.clone(iPhone5BaseDevice),
-	  "iphone-5s-silver-hand": _.clone(iPhone5BaseDeviceHand),
-	  "iphone-5s-gold": _.clone(iPhone5BaseDevice),
-	  "iphone-5s-gold-hand": _.clone(iPhone5BaseDeviceHand),
-	  "iphone-5c-green": _.clone(iPhone5CBaseDevice),
-	  "iphone-5c-green-hand": _.clone(iPhone5CBaseDeviceHand),
-	  "iphone-5c-blue": _.clone(iPhone5CBaseDevice),
-	  "iphone-5c-blue-hand": _.clone(iPhone5CBaseDeviceHand),
-	  "iphone-5c-pink": _.clone(iPhone5CBaseDevice),
-	  "iphone-5c-pink-hand": _.clone(iPhone5CBaseDeviceHand),
-	  "iphone-5c-white": _.clone(iPhone5CBaseDevice),
-	  "iphone-5c-white-hand": _.clone(iPhone5CBaseDeviceHand),
-	  "iphone-5c-yellow": _.clone(iPhone5CBaseDevice),
-	  "iphone-5c-yellow-hand": _.clone(iPhone5CBaseDeviceHand),
-	  "ipad-mini-spacegray": _.clone(iPadMiniBaseDevice),
-	  "ipad-mini-spacegray-hand": _.clone(iPadMiniBaseDeviceHand),
-	  "ipad-mini-silver": _.clone(iPadMiniBaseDevice),
-	  "ipad-mini-silver-hand": _.clone(iPadMiniBaseDeviceHand),
-	  "ipad-air-spacegray": _.clone(iPadAirBaseDevice),
-	  "ipad-air-spacegray-hand": _.clone(iPadAirBaseDeviceHand),
-	  "ipad-air-silver": _.clone(iPadAirBaseDevice),
-	  "ipad-air-silver-hand": _.clone(iPadAirBaseDeviceHand),
-	  "nexus-5-black": _.clone(Nexus5BaseDevice),
-	  "nexus-5-black-hand": _.clone(Nexus5BaseDeviceHand),
-	  "nexus-9": _.clone(Nexus9BaseDevice),
-	  "applewatchsport-38-aluminum-sportband-black": _.clone(AppleWatch38Device),
-	  "applewatchsport-38-aluminum-sportband-blue": _.clone(AppleWatch38Device),
-	  "applewatchsport-38-aluminum-sportband-green": _.clone(AppleWatch38Device),
-	  "applewatchsport-38-aluminum-sportband-pink": _.clone(AppleWatch38Device),
-	  "applewatchsport-38-aluminum-sportband-white": _.clone(AppleWatch38Device),
-	  "applewatch-38-black-bracelet": _.clone(AppleWatch38Device),
-	  "applewatch-38-steel-bracelet": _.clone(AppleWatch38Device),
-	  "applewatchedition-38-gold-buckle-blue": _.clone(AppleWatch38Device),
-	  "applewatchedition-38-gold-buckle-gray": _.clone(AppleWatch38Device),
-	  "applewatchedition-38-gold-buckle-red": _.clone(AppleWatch38Device),
-	  "applewatchedition-38-gold-sportband-black": _.clone(AppleWatch38Device),
-	  "applewatchedition-38-gold-sportband-white": _.clone(AppleWatch38Device),
-	  "applewatchsport-42-aluminum-sportband-black": _.clone(AppleWatch42Device),
-	  "applewatchsport-42-aluminum-sportband-blue": _.clone(AppleWatch42Device),
-	  "applewatchsport-42-aluminum-sportband-green": _.clone(AppleWatch42Device),
-	  "applewatchsport-42-aluminum-sportband-pink": _.clone(AppleWatch42Device),
-	  "applewatchsport-42-aluminum-sportband-white": _.clone(AppleWatch42Device),
-	  "applewatch-42-black-bracelet": _.clone(AppleWatch42Device),
-	  "applewatch-42-steel-bracelet": _.clone(AppleWatch42Device),
-	  "applewatchedition-42-gold-buckle-blue": _.clone(AppleWatch42Device),
-	  "applewatchedition-42-gold-buckle-gray": _.clone(AppleWatch42Device),
-	  "applewatchedition-42-gold-buckle-red": _.clone(AppleWatch42Device),
-	  "applewatchedition-42-gold-sportband-black": _.clone(AppleWatch42Device),
-	  "applewatchedition-42-gold-sportband-white": _.clone(AppleWatch42Device)
+	  "iphone-6-spacegray": _.clone(old_iPhone6BaseDevice),
+	  "iphone-6-spacegray-hand": _.clone(old_iPhone6BaseDeviceHand),
+	  "iphone-6-silver": _.clone(old_iPhone6BaseDevice),
+	  "iphone-6-silver-hand": _.clone(old_iPhone6BaseDeviceHand),
+	  "iphone-6-gold": _.clone(old_iPhone6BaseDevice),
+	  "iphone-6-gold-hand": _.clone(old_iPhone6BaseDeviceHand),
+	  "iphone-6plus-spacegray": _.clone(old_iPhone6PlusBaseDevice),
+	  "iphone-6plus-spacegray-hand": _.clone(old_iPhone6PlusBaseDeviceHand),
+	  "iphone-6plus-silver": _.clone(old_iPhone6PlusBaseDevice),
+	  "iphone-6plus-silver-hand": _.clone(old_iPhone6PlusBaseDeviceHand),
+	  "iphone-6plus-gold": _.clone(old_iPhone6PlusBaseDevice),
+	  "iphone-6plus-gold-hand": _.clone(old_iPhone6PlusBaseDeviceHand),
+	  "iphone-5s-spacegray": _.clone(old_iPhone5BaseDevice),
+	  "iphone-5s-spacegray-hand": _.clone(old_iPhone5BaseDeviceHand),
+	  "iphone-5s-silver": _.clone(old_iPhone5BaseDevice),
+	  "iphone-5s-silver-hand": _.clone(old_iPhone5BaseDeviceHand),
+	  "iphone-5s-gold": _.clone(old_iPhone5BaseDevice),
+	  "iphone-5s-gold-hand": _.clone(old_iPhone5BaseDeviceHand),
+	  "iphone-5c-green": _.clone(old_iPhone5CBaseDevice),
+	  "iphone-5c-green-hand": _.clone(old_iPhone5CBaseDeviceHand),
+	  "iphone-5c-blue": _.clone(old_iPhone5CBaseDevice),
+	  "iphone-5c-blue-hand": _.clone(old_iPhone5CBaseDeviceHand),
+	  "iphone-5c-pink": _.clone(old_iPhone5CBaseDevice),
+	  "iphone-5c-pink-hand": _.clone(old_iPhone5CBaseDeviceHand),
+	  "iphone-5c-white": _.clone(old_iPhone5CBaseDevice),
+	  "iphone-5c-white-hand": _.clone(old_iPhone5CBaseDeviceHand),
+	  "iphone-5c-yellow": _.clone(old_iPhone5CBaseDevice),
+	  "iphone-5c-yellow-hand": _.clone(old_iPhone5CBaseDeviceHand),
+	  "ipad-mini-spacegray": _.clone(old_iPadMiniBaseDevice),
+	  "ipad-mini-spacegray-hand": _.clone(old_iPadMiniBaseDeviceHand),
+	  "ipad-mini-silver": _.clone(old_iPadMiniBaseDevice),
+	  "ipad-mini-silver-hand": _.clone(old_iPadMiniBaseDeviceHand),
+	  "ipad-air-spacegray": _.clone(old_iPadAirBaseDevice),
+	  "ipad-air-spacegray-hand": _.clone(old_iPadAirBaseDeviceHand),
+	  "ipad-air-silver": _.clone(old_iPadAirBaseDevice),
+	  "ipad-air-silver-hand": _.clone(old_iPadAirBaseDeviceHand),
+	  "nexus-5-black": _.clone(old_Nexus5BaseDevice),
+	  "nexus-5-black-hand": _.clone(old_Nexus5BaseDeviceHand),
+	  "nexus-9": _.clone(old_Nexus9BaseDevice),
+	  "applewatchsport-38-aluminum-sportband-black": _.clone(old_AppleWatch38Device),
+	  "applewatchsport-38-aluminum-sportband-blue": _.clone(old_AppleWatch38Device),
+	  "applewatchsport-38-aluminum-sportband-green": _.clone(old_AppleWatch38Device),
+	  "applewatchsport-38-aluminum-sportband-pink": _.clone(old_AppleWatch38Device),
+	  "applewatchsport-38-aluminum-sportband-white": _.clone(old_AppleWatch38Device),
+	  "applewatch-38-black-bracelet": _.clone(old_AppleWatch38Device),
+	  "applewatch-38-steel-bracelet": _.clone(old_AppleWatch38Device),
+	  "applewatchedition-38-gold-buckle-blue": _.clone(old_AppleWatch38Device),
+	  "applewatchedition-38-gold-buckle-gray": _.clone(old_AppleWatch38Device),
+	  "applewatchedition-38-gold-buckle-red": _.clone(old_AppleWatch38Device),
+	  "applewatchedition-38-gold-sportband-black": _.clone(old_AppleWatch38Device),
+	  "applewatchedition-38-gold-sportband-white": _.clone(old_AppleWatch38Device),
+	  "applewatchsport-42-aluminum-sportband-black": _.clone(old_AppleWatch42Device),
+	  "applewatchsport-42-aluminum-sportband-blue": _.clone(old_AppleWatch42Device),
+	  "applewatchsport-42-aluminum-sportband-green": _.clone(old_AppleWatch42Device),
+	  "applewatchsport-42-aluminum-sportband-pink": _.clone(old_AppleWatch42Device),
+	  "applewatchsport-42-aluminum-sportband-white": _.clone(old_AppleWatch42Device),
+	  "applewatch-42-black-bracelet": _.clone(old_AppleWatch42Device),
+	  "applewatch-42-steel-bracelet": _.clone(old_AppleWatch42Device),
+	  "applewatchedition-42-gold-buckle-blue": _.clone(old_AppleWatch42Device),
+	  "applewatchedition-42-gold-buckle-gray": _.clone(old_AppleWatch42Device),
+	  "applewatchedition-42-gold-buckle-red": _.clone(old_AppleWatch42Device),
+	  "applewatchedition-42-gold-sportband-black": _.clone(old_AppleWatch42Device),
+	  "applewatchedition-42-gold-sportband-white": _.clone(old_AppleWatch42Device)
 	};
 	
 	exports.DeviceComponent.Devices = Devices;
@@ -22145,7 +24263,7 @@
 
 
 /***/ },
-/* 43 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Config, EventEmitter, Utils, _, getTime,
@@ -22157,7 +24275,7 @@
 	
 	Utils = __webpack_require__(4);
 	
-	Config = __webpack_require__(13).Config;
+	Config = __webpack_require__(14).Config;
 	
 	EventEmitter = __webpack_require__(7).EventEmitter;
 	
@@ -22172,11 +24290,10 @@
 	    this.start = bind(this.start, this);
 	    this.delta = 1 / 60;
 	    this.raf = true;
-	    if (Utils.webkitVersion() > 600 && Utils.isDesktop()) {
-	      this.raf = false;
-	    }
-	    if (Utils.webkitVersion() > 600 && Utils.isFramerStudio()) {
-	      this.raf = false;
+	    if (Utils.webkitVersion() > 600 && Utils.webkitVersion() < 601) {
+	      if (Utils.isFramerStudio() || Utils.isDesktop()) {
+	        this.raf = false;
+	      }
 	    }
 	    this.maximumListeners = Infinity;
 	  }
@@ -22217,10 +24334,10 @@
 
 
 /***/ },
-/* 44 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var ChromeAlert, Utils, _, getScaleFromName, resizeFrame, startsWithNumber;
+	var ChromeAlert, Utils, _, getScaleFromName, resizeFrame, sanitizeLayerName, startsWithNumber;
 	
 	_ = __webpack_require__(1)._;
 	
@@ -22260,6 +24377,18 @@
 	  return (new RegExp("^[0-9]")).test(str);
 	};
 	
+	sanitizeLayerName = function(name) {
+	  var i, len, ref, suffix;
+	  ref = ["*", "-", ".png", ".jpg", ".pdf"];
+	  for (i = 0, len = ref.length; i < len; i++) {
+	    suffix = ref[i];
+	    if (_.endsWith(name.toLowerCase(), suffix)) {
+	      name = name.slice(0, +(name.length - suffix.length - 1) + 1 || 9e9);
+	    }
+	  }
+	  return name;
+	};
+	
 	exports.Importer = (function() {
 	  function Importer(path1, scale1, extraLayerProperties) {
 	    this.path = path1;
@@ -22295,8 +24424,8 @@
 	    ref1 = this._createdLayers;
 	    for (j = 0, len1 = ref1.length; j < len1; j++) {
 	      layer = ref1[j];
-	      if (!layer.superLayer) {
-	        layer.superLayer = null;
+	      if (!layer.parent) {
+	        layer.parent = null;
 	      }
 	    }
 	    return this._createdLayersByName;
@@ -22311,7 +24440,7 @@
 	    return Framer.Utils.domLoadJSONSync(this.paths.layerInfo);
 	  };
 	
-	  Importer.prototype._createLayer = function(info, superLayer) {
+	  Importer.prototype._createLayer = function(info, parent) {
 	    var LayerClass, layer, layerInfo, ref, ref1;
 	    if (info.layerFrame) {
 	      info.layerFrame = resizeFrame(this.scale, info.layerFrame);
@@ -22328,7 +24457,7 @@
 	    LayerClass = Layer;
 	    layerInfo = {
 	      shadow: true,
-	      name: info.name,
+	      name: sanitizeLayerName(info.name),
 	      frame: info.layerFrame,
 	      clip: false,
 	      backgroundColor: null,
@@ -22342,14 +24471,13 @@
 	    if (info.maskFrame) {
 	      layerInfo.clip = true;
 	    }
-	    if (layerInfo.kind === "artboard") {
-	      layerInfo.frame.x = 0;
-	      layerInfo.frame.y = 0;
+	    if (info.kind === "artboard") {
+	      layerInfo.backgroundColor = info.backgroundColor;
 	    }
-	    if (superLayer != null ? superLayer.contentLayer : void 0) {
-	      layerInfo.superLayer = superLayer.contentLayer;
-	    } else if (superLayer) {
-	      layerInfo.superLayer = superLayer;
+	    if (parent != null ? parent.contentLayer : void 0) {
+	      layerInfo.parent = parent.contentLayer;
+	    } else if (parent) {
+	      layerInfo.parent = parent;
 	    }
 	    if (startsWithNumber(layerInfo.name)) {
 	      throw new Error("(" + layerInfo.name + ") Layer or Artboard names can not start with a number");
@@ -22417,19 +24545,19 @@
 	  Importer.prototype._correctLayer = function(layer) {
 	    var traverse;
 	    traverse = function(layer) {
-	      var i, len, ref, results, subLayer;
-	      if (layer.superLayer) {
-	        layer.frame = Utils.convertPoint(layer.frame, null, layer.superLayer);
+	      var child, i, len, ref, results;
+	      if (layer.parent) {
+	        layer.frame = Utils.convertPoint(layer.frame, null, layer.parent);
 	      }
-	      ref = layer.subLayers;
+	      ref = layer.children;
 	      results = [];
 	      for (i = 0, len = ref.length; i < len; i++) {
-	        subLayer = ref[i];
-	        results.push(traverse(subLayer));
+	        child = ref[i];
+	        results.push(traverse(child));
 	      }
 	      return results;
 	    };
-	    if (!layer.superLayer) {
+	    if (!layer.parent) {
 	      return traverse(layer);
 	    }
 	  };
@@ -22452,81 +24580,293 @@
 
 
 /***/ },
-/* 45 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Context, Utils, _errorContext, _errorShown, errorWarning;
+	exports.TouchEmulator = __webpack_require__(50);
+	
+	exports.MobileScrollFix = __webpack_require__(51);
+	
+	exports.OmitNew = __webpack_require__(52);
+
+
+/***/ },
+/* 50 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var BaseClass, TouchEmulator, Utils, cancelEvent, createTouch, dispatchTouchEvent, touchEmulator,
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+	  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+	  hasProp = {}.hasOwnProperty;
 	
 	Utils = __webpack_require__(4);
 	
-	Context = __webpack_require__(37).Context;
+	BaseClass = __webpack_require__(6).BaseClass;
 	
-	_errorContext = null;
-	
-	_errorShown = false;
-	
-	errorWarning = function(event) {
-	  var _errorWarningLayer, layer;
-	  if (!_errorContext) {
-	    _errorContext = new Context({
-	      name: "Error"
-	    });
+	createTouch = function(event, identifier, offset) {
+	  var touch;
+	  if (offset == null) {
+	    offset = {
+	      x: 0,
+	      y: 0
+	    };
 	  }
-	  if (_errorShown) {
-	    return;
-	  }
-	  _errorShown = true;
-	  layer = new Layer({
-	    x: 20,
-	    y: -50,
-	    width: 300,
-	    height: 40
-	  });
-	  layer.states.add({
-	    visible: {
-	      x: 20,
-	      y: 20,
-	      width: 300,
-	      height: 40
-	    }
-	  });
-	  layer.html = "Javascript Error, see the console";
-	  layer.style = {
-	    font: "12px/1.35em Menlo",
-	    color: "white",
-	    textAlign: "center",
-	    lineHeight: layer.height + "px",
-	    borderRadius: "5px",
-	    backgroundColor: "rgba(255,0,0,.8)"
+	  return touch = {
+	    identifier: identifier,
+	    target: event.target,
+	    pageX: event.pageX - offset.x,
+	    pageY: event.pageY - offset.y,
+	    clientX: event.clientX - offset.x,
+	    clientY: event.clientY - offset.y,
+	    screenX: event.screenX - offset.x,
+	    screenY: event.screenY - offset.y
 	  };
-	  layer.states.animationOptions = {
-	    curve: "spring",
-	    curveOptions: {
-	      tension: 1000,
-	      friction: 30
-	    }
-	  };
-	  layer.states["switch"]("visible");
-	  layer.on(Events.Click, function() {
-	    return this.states["switch"]("default");
-	  });
-	  return _errorWarningLayer = layer;
 	};
 	
-	window.error = errorWarning;
-
-
-/***/ },
-/* 46 */
-/***/ function(module, exports, __webpack_require__) {
-
-	exports.MobileScrollFix = __webpack_require__(47);
+	dispatchTouchEvent = function(type, target, event, offset) {
+	  var touchEvent, touches;
+	  if (target == null) {
+	    target = event.target;
+	  }
+	  touchEvent = document.createEvent("MouseEvent");
+	  touchEvent.initMouseEvent(type, true, true, window, event.detail, event.screenX, event.screenY, event.clientX, event.clientY, event.ctrlKey, event.shiftKey, event.altKey, event.metaKey, event.button, event.relatedTarget);
+	  touches = [];
+	  touches.push(createTouch(event, 1));
+	  if (offset) {
+	    touches.push(createTouch(event, 2, offset));
+	  }
+	  touchEvent.touches = touchEvent.changedTouches = touchEvent.targetTouches = touches;
+	  return target.dispatchEvent(touchEvent);
+	};
 	
-	exports.OmitNew = __webpack_require__(48);
+	cancelEvent = function(event) {
+	  event.preventDefault();
+	  return event.stopPropagation();
+	};
+	
+	TouchEmulator = (function(superClass) {
+	  extend(TouchEmulator, superClass);
+	
+	  function TouchEmulator() {
+	    this.mousemovePosition = bind(this.mousemovePosition, this);
+	    this.mouseout = bind(this.mouseout, this);
+	    this.mouseup = bind(this.mouseup, this);
+	    this.mousemove = bind(this.mousemove, this);
+	    this.mousedown = bind(this.mousedown, this);
+	    this.keyup = bind(this.keyup, this);
+	    this.keydown = bind(this.keydown, this);
+	    var touchPointerInitialOffset;
+	    this.touchPointerImage = "url('data:image/png;base64,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')";
+	    this.touchPointerImageActive = "url('data:image/png;base64,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')";
+	    this.touchPointerImageSize = 64;
+	    this.touchPointerInitialOffset = {
+	      x: 0,
+	      y: 0
+	    };
+	    this.keyPinchCode = 18;
+	    this.keyPanCode = 91;
+	    this.context = new Framer.Context({
+	      name: "TouchEmulator"
+	    });
+	    this.context._element.style.zIndex = 10000;
+	    this.wrap = this.context.domEventManager.wrap;
+	    this.wrap(document).addEventListener("mousedown", this.mousedown, true);
+	    this.wrap(document).addEventListener("mousemove", this.mousemove, true);
+	    this.wrap(document).addEventListener("mouseup", this.mouseup, true);
+	    this.wrap(document).addEventListener("keydown", this.keydown, true);
+	    this.wrap(document).addEventListener("keyup", this.keyup, true);
+	    this.wrap(document).addEventListener("mouseout", this.mouseout, true);
+	    this.isMouseDown = false;
+	    this.isPinchKeyDown = false;
+	    this.isPanKeyDown = false;
+	    touchPointerInitialOffset = this.touchPointerInitialOffset;
+	    this.context.run((function(_this) {
+	      return function() {
+	        _this.touchPointLayer = new Layer({
+	          width: _this.touchPointerImageSize,
+	          height: _this.touchPointerImageSize,
+	          backgroundColor: null,
+	          opacity: 0
+	        });
+	        return _this.touchPointLayer.style.backgroundImage = _this.touchPointerImage;
+	      };
+	    })(this));
+	  }
+	
+	  TouchEmulator.prototype.destroy = function() {
+	    this.context.reset();
+	    return this.context = null;
+	  };
+	
+	  TouchEmulator.prototype.keydown = function(event) {
+	    if (event.keyCode === this.keyPinchCode) {
+	      this.isPinchKeyDown = true;
+	      this.startPoint = this.centerPoint = null;
+	      this.showTouchCursor();
+	      this.touchPointLayer.midX = this.point.x;
+	      this.touchPointLayer.midY = this.point.y;
+	    }
+	    if (event.keyCode === this.keyPanCode) {
+	      this.isPanKeyDown = true;
+	      return cancelEvent(event);
+	    }
+	  };
+	
+	  TouchEmulator.prototype.keyup = function(event) {
+	    if (event.keyCode === this.keyPinchCode) {
+	      cancelEvent(event);
+	      this.isPinchKeyDown = false;
+	      this.hideTouchCursor();
+	    }
+	    if (event.keyCode === this.keyPanCode) {
+	      cancelEvent(event);
+	      if (this.touchPoint && this.point) {
+	        this.centerPoint = Utils.pointCenter(this.touchPoint, this.point);
+	        return this.isPanKeyDown = false;
+	      }
+	    }
+	  };
+	
+	  TouchEmulator.prototype.mousedown = function(event) {
+	    this.isMouseDown = true;
+	    this.target = event.target;
+	    if (this.isPinchKeyDown) {
+	      dispatchTouchEvent("touchstart", this.target, event, this.touchPointDelta);
+	    } else {
+	      dispatchTouchEvent("touchstart", this.target, event);
+	    }
+	    return this.touchPointLayer.style.backgroundImage = this.touchPointerImageActive;
+	  };
+	
+	  TouchEmulator.prototype.mousemove = function(event) {
+	    this.point = {
+	      x: event.pageX,
+	      y: event.pageY
+	    };
+	    if (this.startPoint == null) {
+	      this.startPoint = this.point;
+	    }
+	    if (this.centerPoint == null) {
+	      this.centerPoint = this.point;
+	    }
+	    if (this.isPinchKeyDown && !this.isPanKeyDown) {
+	      if (this.touchPointerInitialOffset && this.centerPoint) {
+	        this.touchPoint = Utils.pointAdd(this.touchPointerInitialOffset, this.pinchPoint(this.point, this.centerPoint));
+	        this.touchPointDelta = Utils.pointSubtract(this.point, this.touchPoint);
+	      }
+	    }
+	    if (this.isPinchKeyDown && this.isPanKeyDown) {
+	      if (this.touchPoint && this.touchPointDelta) {
+	        this.touchPoint = this.panPoint(this.point, this.touchPointDelta);
+	      }
+	    }
+	    if (this.isPinchKeyDown || this.isPanKeyDown) {
+	      if (this.touchPoint) {
+	        this.touchPointLayer.visible = true;
+	        this.touchPointLayer.midX = this.touchPoint.x;
+	        this.touchPointLayer.midY = this.touchPoint.y;
+	      }
+	    }
+	    if (this.isMouseDown) {
+	      if ((this.isPinchKeyDown || this.isPanKeyDown) && this.touchPointDelta) {
+	        return dispatchTouchEvent("touchmove", this.target, event, this.touchPointDelta);
+	      } else {
+	        return dispatchTouchEvent("touchmove", this.target, event);
+	      }
+	    }
+	  };
+	
+	  TouchEmulator.prototype.mouseup = function(event) {
+	    if (this.isPinchKeyDown || this.isPanKeyDown) {
+	      dispatchTouchEvent("touchend", this.target, event, this.touchPointDelta);
+	    } else {
+	      dispatchTouchEvent("touchend", this.target, event);
+	    }
+	    return this.endMultiTouch();
+	  };
+	
+	  TouchEmulator.prototype.mouseout = function(event) {
+	    var fromElement;
+	    if (this.isMouseDown) {
+	      return;
+	    }
+	    fromElement = event.relatedTarget || event.toElement;
+	    if (!fromElement || fromElement.nodeName === "HTML") {
+	      return this.endMultiTouch();
+	    }
+	  };
+	
+	  TouchEmulator.prototype.showTouchCursor = function() {
+	    this.touchPointLayer.animateStop();
+	    this.touchPointLayer.midX = this.point.x;
+	    this.touchPointLayer.midY = this.point.y;
+	    this.touchPointLayer.scale = 1.8;
+	    return this.touchPointLayer.animate({
+	      properties: {
+	        opacity: 1,
+	        scale: 1
+	      },
+	      time: 0.1,
+	      curve: "ease-out"
+	    });
+	  };
+	
+	  TouchEmulator.prototype.hideTouchCursor = function() {
+	    this.touchPointLayer.animateStop();
+	    return this.touchPointLayer.animate({
+	      properties: {
+	        opacity: 0,
+	        scale: 1.2
+	      },
+	      time: 0.08
+	    });
+	  };
+	
+	  TouchEmulator.prototype.mousemovePosition = function(event) {
+	    return this.point = {
+	      x: event.pageX,
+	      y: event.pageY
+	    };
+	  };
+	
+	  TouchEmulator.prototype.endMultiTouch = function() {
+	    this.isMouseDown = false;
+	    this.touchPointLayer.style.backgroundImage = this.touchPointerImage;
+	    return this.hideTouchCursor();
+	  };
+	
+	  TouchEmulator.prototype.pinchPoint = function(point, centerPoint) {
+	    return Utils.pointSubtract(centerPoint, Utils.pointSubtract(point, centerPoint));
+	  };
+	
+	  TouchEmulator.prototype.panPoint = function(point, offsetPoint) {
+	    return Utils.pointSubtract(point, offsetPoint);
+	  };
+	
+	  return TouchEmulator;
+	
+	})(BaseClass);
+	
+	touchEmulator = null;
+	
+	exports.enable = function() {
+	  if (Utils.isTouch()) {
+	    return;
+	  }
+	  return touchEmulator != null ? touchEmulator : touchEmulator = new TouchEmulator();
+	};
+	
+	exports.disable = function() {
+	  if (!touchEmulator) {
+	    return;
+	  }
+	  touchEmulator.destroy();
+	  return touchEmulator = null;
+	};
 
 
 /***/ },
-/* 47 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Utils,
@@ -22587,7 +24927,7 @@
 
 
 /***/ },
-/* 48 */
+/* 52 */
 /***/ function(module, exports) {
 
 	var slice = [].slice;
@@ -22617,16 +24957,695 @@
 
 
 /***/ },
-/* 49 */
+/* 53 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var DOMEventManager, GestureInputDoubleTapTime, GestureInputEdgeSwipeDistance, GestureInputForceTapDesktop, GestureInputForceTapMobile, GestureInputForceTapMobilePollTime, GestureInputLongPressTime, GestureInputMinimumFingerDistance, GestureInputSwipeThreshold, GestureInputVelocityTime, Utils,
+	  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+	
+	Utils = __webpack_require__(4);
+	
+	GestureInputLongPressTime = 0.5;
+	
+	GestureInputDoubleTapTime = 0.25;
+	
+	GestureInputSwipeThreshold = 30;
+	
+	GestureInputEdgeSwipeDistance = 30;
+	
+	GestureInputVelocityTime = 0.1;
+	
+	GestureInputForceTapDesktop = MouseEvent.WEBKIT_FORCE_AT_FORCE_MOUSE_DOWN;
+	
+	GestureInputForceTapMobile = 0.7;
+	
+	GestureInputForceTapMobilePollTime = 1 / 30;
+	
+	GestureInputMinimumFingerDistance = 30;
+	
+	DOMEventManager = __webpack_require__(42).DOMEventManager;
+	
+	exports.GestureInputRecognizer = (function() {
+	  function GestureInputRecognizer() {
+	    this._process = bind(this._process, this);
+	    this.edgeswipedirectionend = bind(this.edgeswipedirectionend, this);
+	    this.edgeswipedirectionstart = bind(this.edgeswipedirectionstart, this);
+	    this.edgeswipedirection = bind(this.edgeswipedirection, this);
+	    this.swipedirectionend = bind(this.swipedirectionend, this);
+	    this.swipedirection = bind(this.swipedirection, this);
+	    this.swipedirectionstart = bind(this.swipedirectionstart, this);
+	    this.swipeend = bind(this.swipeend, this);
+	    this.swipe = bind(this.swipe, this);
+	    this.swipestart = bind(this.swipestart, this);
+	    this.rotateend = bind(this.rotateend, this);
+	    this.rotate = bind(this.rotate, this);
+	    this.rotatestart = bind(this.rotatestart, this);
+	    this.scaleend = bind(this.scaleend, this);
+	    this.scale = bind(this.scale, this);
+	    this.scalestart = bind(this.scalestart, this);
+	    this.pinchend = bind(this.pinchend, this);
+	    this.pinch = bind(this.pinch, this);
+	    this.pinchstart = bind(this.pinchstart, this);
+	    this.panright = bind(this.panright, this);
+	    this.panleft = bind(this.panleft, this);
+	    this.pandown = bind(this.pandown, this);
+	    this.panup = bind(this.panup, this);
+	    this.panend = bind(this.panend, this);
+	    this.pan = bind(this.pan, this);
+	    this.panstart = bind(this.panstart, this);
+	    this.forcetapend = bind(this.forcetapend, this);
+	    this.forcetapstart = bind(this.forcetapstart, this);
+	    this.forcetapchange = bind(this.forcetapchange, this);
+	    this._updateMacForce = bind(this._updateMacForce, this);
+	    this._updateTouchForce = bind(this._updateTouchForce, this);
+	    this.longpressend = bind(this.longpressend, this);
+	    this.longpressstart = bind(this.longpressstart, this);
+	    this.doubletap = bind(this.doubletap, this);
+	    this.tapend = bind(this.tapend, this);
+	    this.tapstart = bind(this.tapstart, this);
+	    this.tap = bind(this.tap, this);
+	    this.touchend = bind(this.touchend, this);
+	    this.touchmove = bind(this.touchmove, this);
+	    this.touchstart = bind(this.touchstart, this);
+	    this.startTouch = bind(this.startTouch, this);
+	    this.startMouse = bind(this.startMouse, this);
+	    this.em = new DOMEventManager();
+	    this.em.wrap(window).addEventListener("mousedown", this.startMouse);
+	    this.em.wrap(window).addEventListener("touchstart", this.startTouch);
+	  }
+	
+	  GestureInputRecognizer.prototype.destroy = function() {
+	    return this.em.removeAllListeners();
+	  };
+	
+	  GestureInputRecognizer.prototype.cancel = function() {
+	    window.clearTimeout(this.session.pressTimer);
+	    return this.session = null;
+	  };
+	
+	  GestureInputRecognizer.prototype.startMouse = function(event) {
+	    if (this.session) {
+	      return;
+	    }
+	    this.em.wrap(window).addEventListener("mousemove", this.touchmove);
+	    this.em.wrap(window).addEventListener("mouseup", this.touchend);
+	    return this.touchstart(event);
+	  };
+	
+	  GestureInputRecognizer.prototype.startTouch = function(event) {
+	    if (this.session) {
+	      return;
+	    }
+	    this.em.wrap(window).addEventListener("touchmove", this.touchmove);
+	    this.em.wrap(window).addEventListener("touchend", this.touchend);
+	    return this.touchstart(event);
+	  };
+	
+	  GestureInputRecognizer.prototype.touchstart = function(event) {
+	    if (this.session) {
+	      return;
+	    }
+	    this.em.wrap(window).addEventListener("webkitmouseforcechanged", this._updateMacForce);
+	    this.session = {
+	      startEvent: this._getGestureEvent(event),
+	      lastEvent: null,
+	      startMultiEvent: null,
+	      startTime: Date.now(),
+	      pressTimer: window.setTimeout(this.longpressstart, GestureInputLongPressTime * 1000),
+	      started: {},
+	      events: [],
+	      eventCount: 0
+	    };
+	    event = this._getGestureEvent(event);
+	    this.tapstart(event);
+	    if (Date.now() - this.doubleTapTime < (GestureInputDoubleTapTime * 1000)) {
+	      this.doubletap(event);
+	    } else {
+	      this.doubleTapTime = Date.now();
+	    }
+	    this._process(event);
+	    if (Utils.isTouch()) {
+	      return this._updateTouchForce();
+	    }
+	  };
+	
+	  GestureInputRecognizer.prototype.touchmove = function(event) {
+	    return this._process(this._getGestureEvent(event));
+	  };
+	
+	  GestureInputRecognizer.prototype.touchend = function(event) {
+	    var eventName, ref, ref1, value;
+	    if (event.touches != null) {
+	      if (Utils.isTouch()) {
+	        if (!(event.touches.length === 0)) {
+	          return;
+	        }
+	      } else {
+	        if (!(event.touches.length === event.changedTouches.length)) {
+	          return;
+	        }
+	      }
+	    }
+	    this.em.wrap(window).removeEventListener("mousemove", this.touchmove);
+	    this.em.wrap(window).removeEventListener("mouseup", this.touchend);
+	    this.em.wrap(window).removeEventListener("touchmove", this.touchmove);
+	    this.em.wrap(window).removeEventListener("touchend", this.touchend);
+	    this.em.wrap(window).addEventListener("webkitmouseforcechanged", this._updateMacForce);
+	    event = this._getGestureEvent(event);
+	    ref = this.session.started;
+	    for (eventName in ref) {
+	      value = ref[eventName];
+	      if (value) {
+	        this[eventName + "end"](event);
+	      }
+	    }
+	    if (!((ref1 = this.session) != null ? ref1.startEvent : void 0)) {
+	      this.tap(event);
+	    } else if (this.session.startEvent.target === event.target) {
+	      this.tap(event);
+	    }
+	    this.tapend(event);
+	    return this.cancel();
+	  };
+	
+	  GestureInputRecognizer.prototype.tap = function(event) {
+	    return this._dispatchEvent("tap", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.tapstart = function(event) {
+	    return this._dispatchEvent("tapstart", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.tapend = function(event) {
+	    return this._dispatchEvent("tapend", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.doubletap = function(event) {
+	    return this._dispatchEvent("doubletap", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.longpressstart = function() {
+	    var event;
+	    if (!this.session) {
+	      return;
+	    }
+	    if (this.session.started.longpress) {
+	      return;
+	    }
+	    event = this._getGestureEvent(this.session.startEvent);
+	    this.session.started.longpress = event;
+	    this._dispatchEvent("longpressstart", event);
+	    return this._dispatchEvent("longpress", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.longpressend = function(event) {
+	    return this._dispatchEvent("longpressend", event);
+	  };
+	
+	  GestureInputRecognizer.prototype._updateTouchForce = function() {
+	    var event, ref, ref1;
+	    if (!((ref = this.session) != null ? (ref1 = ref.lastEvent) != null ? ref1.touches.length : void 0 : void 0)) {
+	      return;
+	    }
+	    this.session.force = this.session.lastEvent.touches[0].force || 0;
+	    event = this._getGestureEvent(this.session.lastEvent);
+	    this.forcetapchange(event);
+	    if (this.session.force >= GestureInputForceTapMobile) {
+	      this.forcetapstart(event);
+	    } else {
+	      this.forcetapend(event);
+	    }
+	    return setTimeout(this._updateTouchForce, GestureInputForceTapMobilePollTime);
+	  };
+	
+	  GestureInputRecognizer.prototype._updateMacForce = function(event) {
+	    if (!this.session) {
+	      return;
+	    }
+	    this.session.force = Utils.modulate(event.webkitForce, [0, 3], [0, 1]);
+	    this.forcetapchange(this._getGestureEvent(event));
+	    if (event.webkitForce >= GestureInputForceTapDesktop) {
+	      return this.forcetapstart(event);
+	    } else {
+	      return this.forcetapend(event);
+	    }
+	  };
+	
+	  GestureInputRecognizer.prototype.forcetapchange = function(event) {
+	    return this._dispatchEvent("forcetapchange", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.forcetapstart = function(event) {
+	    if (!this.session) {
+	      return;
+	    }
+	    if (this.session.started.forcetap) {
+	      return;
+	    }
+	    this.session.started.forcetap = event;
+	    this._dispatchEvent("forcetapstart", event);
+	    return this._dispatchEvent("forcetap", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.forcetapend = function(event) {
+	    if (!this.session) {
+	      return;
+	    }
+	    if (!this.session.started.forcetap) {
+	      return;
+	    }
+	    this.session.started.forcetap = null;
+	    return this._dispatchEvent("forcetapend", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.panstart = function(event) {
+	    this.session.started.pan = event;
+	    return this._dispatchEvent("panstart", event, this.session.started.pan.target);
+	  };
+	
+	  GestureInputRecognizer.prototype.pan = function(event) {
+	    var direction;
+	    this._dispatchEvent("pan", event, this.session.started.pan.target);
+	    direction = this._getDirection(event.delta);
+	    if (direction) {
+	      return this["pan" + direction](event);
+	    }
+	  };
+	
+	  GestureInputRecognizer.prototype.panend = function(event) {
+	    this._dispatchEvent("panend", event, this.session.started.pan.target);
+	    return this.session.started.pan = null;
+	  };
+	
+	  GestureInputRecognizer.prototype.panup = function(event) {
+	    return this._dispatchEvent("panup", event, this.session.started.pan.target);
+	  };
+	
+	  GestureInputRecognizer.prototype.pandown = function(event) {
+	    return this._dispatchEvent("pandown", event, this.session.started.pan.target);
+	  };
+	
+	  GestureInputRecognizer.prototype.panleft = function(event) {
+	    return this._dispatchEvent("panleft", event, this.session.started.pan.target);
+	  };
+	
+	  GestureInputRecognizer.prototype.panright = function(event) {
+	    return this._dispatchEvent("panright", event, this.session.started.pan.target);
+	  };
+	
+	  GestureInputRecognizer.prototype.pinchstart = function(event) {
+	    this.session.started.pinch = event;
+	    this.scalestart(event, this.session.started.pinch.target);
+	    this.rotatestart(event, this.session.started.pinch.target);
+	    return this._dispatchEvent("pinchstart", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.pinch = function(event) {
+	    this._dispatchEvent("pinch", event);
+	    this.scale(event, this.session.started.pinch.target);
+	    return this.rotate(event, this.session.started.pinch.target);
+	  };
+	
+	  GestureInputRecognizer.prototype.pinchend = function(event) {
+	    this._dispatchEvent("pinchend", event);
+	    this.scaleend(event, this.session.started.pinch.target);
+	    this.rotateend(event, this.session.started.pinch.target);
+	    return this.session.started.pinch = null;
+	  };
+	
+	  GestureInputRecognizer.prototype.scalestart = function(event) {
+	    return this._dispatchEvent("scalestart", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.scale = function(event) {
+	    return this._dispatchEvent("scale", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.scaleend = function(event) {
+	    return this._dispatchEvent("scaleend", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.rotatestart = function(event) {
+	    return this._dispatchEvent("rotatestart", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.rotate = function(event) {
+	    return this._dispatchEvent("rotate", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.rotateend = function(event) {
+	    return this._dispatchEvent("rotateend", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.swipestart = function(event) {
+	    this._dispatchEvent("swipestart", event);
+	    this.session.started.swipe = event;
+	    return this.swipedirectionstart(event);
+	  };
+	
+	  GestureInputRecognizer.prototype.swipe = function(event) {
+	    this._dispatchEvent("swipe", event);
+	    return this.swipedirection(event);
+	  };
+	
+	  GestureInputRecognizer.prototype.swipeend = function(event) {
+	    return this._dispatchEvent("swipeend", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.swipedirectionstart = function(event) {
+	    var direction, maxX, maxY, ref, ref1, ref2, ref3, swipeEdge;
+	    if (!event.offsetDirection) {
+	      return;
+	    }
+	    if (this.session.started.swipedirection) {
+	      return;
+	    }
+	    this.session.started.swipedirection = event;
+	    direction = this.session.started.swipedirection.offsetDirection;
+	    this._dispatchEvent("swipe" + direction + "start", event);
+	    swipeEdge = this._edgeForSwipeDirection(direction);
+	    maxX = Utils.frameGetMaxX(Screen.canvasFrame);
+	    maxY = Utils.frameGetMaxY(Screen.canvasFrame);
+	    if (swipeEdge === "top" && (0 < (ref = event.start.y - Screen.canvasFrame.y) && ref < GestureInputEdgeSwipeDistance)) {
+	      this.edgeswipedirectionstart(event);
+	    }
+	    if (swipeEdge === "right" && (maxX - GestureInputEdgeSwipeDistance < (ref1 = event.start.x) && ref1 < maxX)) {
+	      this.edgeswipedirectionstart(event);
+	    }
+	    if (swipeEdge === "bottom" && (maxY - GestureInputEdgeSwipeDistance < (ref2 = event.start.y) && ref2 < maxY)) {
+	      this.edgeswipedirectionstart(event);
+	    }
+	    if (swipeEdge === "left" && (0 < (ref3 = event.start.x - Screen.canvasFrame.x) && ref3 < GestureInputEdgeSwipeDistance)) {
+	      return this.edgeswipedirectionstart(event);
+	    }
+	  };
+	
+	  GestureInputRecognizer.prototype.swipedirection = function(event) {
+	    var direction;
+	    if (!this.session.started.swipedirection) {
+	      return;
+	    }
+	    direction = this.session.started.swipedirection.offsetDirection;
+	    this._dispatchEvent("swipe" + direction, event);
+	    if (this.session.started.edgeswipedirection) {
+	      return this.edgeswipedirection(event);
+	    }
+	  };
+	
+	  GestureInputRecognizer.prototype.swipedirectionend = function(event) {
+	    var direction;
+	    if (!this.session.started.swipedirection) {
+	      return;
+	    }
+	    direction = this.session.started.swipedirection.offsetDirection;
+	    return this._dispatchEvent("swipe" + direction + "end", event);
+	  };
+	
+	  GestureInputRecognizer.prototype.edgeswipedirection = function(event) {
+	    var swipeEdge;
+	    swipeEdge = this._edgeForSwipeDirection(this.session.started.edgeswipedirection.offsetDirection);
+	    Screen.emit("edgeswipe", this._createEvent("edgeswipe", event));
+	    return Screen.emit("edgeswipe" + swipeEdge, this._createEvent("edgeswipe" + swipeEdge, event));
+	  };
+	
+	  GestureInputRecognizer.prototype.edgeswipedirectionstart = function(event) {
+	    var swipeEdge;
+	    if (this.session.started.edgeswipedirection) {
+	      return;
+	    }
+	    this.session.started.edgeswipedirection = event;
+	    swipeEdge = this._edgeForSwipeDirection(this.session.started.edgeswipedirection.offsetDirection);
+	    Screen.emit("edgeswipestart", this._createEvent("edgeswipestart", event));
+	    return Screen.emit("edgeswipe" + swipeEdge + "start", this._createEvent("edgeswipe" + swipeEdge + "start", event));
+	  };
+	
+	  GestureInputRecognizer.prototype.edgeswipedirectionend = function(event) {
+	    var swipeEdge;
+	    swipeEdge = this._edgeForSwipeDirection(this.session.started.edgeswipedirection.offsetDirection);
+	    Screen.emit("edgeswipeend", this._createEvent("edgeswipeend", event));
+	    return Screen.emit("edgeswipe" + swipeEdge + "end", this._createEvent("edgeswipe" + swipeEdge + "end", event));
+	  };
+	
+	  GestureInputRecognizer.prototype._process = function(event) {
+	    if (!this.session) {
+	      return;
+	    }
+	    this.session.events.push(event);
+	    event.eventCount = this.session.eventCount++;
+	    if (Math.abs(event.delta.x) > 0 || Math.abs(event.delta.y) > 0) {
+	      if (!this.session.started.pan) {
+	        this.panstart(event);
+	      } else {
+	        this.pan(event);
+	      }
+	    }
+	    if (this.session.started.pinch && event.fingers === 1) {
+	      this.pinchend(event);
+	    } else if (!this.session.started.pinch && event.fingers === 2) {
+	      this.pinchstart(event);
+	    } else if (this.session.started.pinch) {
+	      this.pinch(event);
+	    }
+	    if (!this.session.started.swipe && (Math.abs(event.offset.x) > GestureInputSwipeThreshold || Math.abs(event.offset.y) > GestureInputSwipeThreshold)) {
+	      this.swipestart(event);
+	    } else if (this.session.started.swipe) {
+	      this.swipe(event);
+	    }
+	    return this.session.lastEvent = event;
+	  };
+	
+	  GestureInputRecognizer.prototype._getEventPoint = function(event) {
+	    var ref;
+	    if ((ref = event.touches) != null ? ref.length : void 0) {
+	      return this._getTouchPoint(event, 0);
+	    }
+	    return {
+	      x: event.pageX,
+	      y: event.pageY
+	    };
+	  };
+	
+	  GestureInputRecognizer.prototype._getGestureEvent = function(event) {
+	    var events, i, len, pointKey, ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7, ref8, ref9, touchPointA, touchPointB;
+	    _.extend(event, {
+	      time: Date.now(),
+	      point: this._getEventPoint(event),
+	      start: this._getEventPoint(event),
+	      previous: this._getEventPoint(event),
+	      offset: {
+	        x: 0,
+	        y: 0
+	      },
+	      offsetTime: 0,
+	      offsetAngle: 0,
+	      offsetDirection: null,
+	      delta: {
+	        x: 0,
+	        y: 0
+	      },
+	      deltaTime: 0,
+	      deltaAngle: 0,
+	      deltaDirection: null,
+	      force: 0,
+	      velocity: {
+	        x: 0,
+	        y: 0
+	      },
+	      fingers: ((ref = event.touches) != null ? ref.length : void 0) || 0,
+	      touchCenter: this._getEventPoint(event),
+	      touchOffset: {
+	        x: 0,
+	        y: 0
+	      },
+	      touchDistance: 0,
+	      scale: 1,
+	      scaleDirection: null,
+	      rotation: 0
+	    });
+	    if ((ref1 = this.session) != null ? ref1.startEvent : void 0) {
+	      event.start = this.session.startEvent.point;
+	      event.offset = Utils.pointSubtract(event.point, event.start);
+	      event.offsetTime = event.time - this.session.startEvent.time;
+	      event.offsetAngle = Utils.pointAngle(this.session.startEvent.point, event.point);
+	      event.offsetDirection = this._getDirection(event.offset);
+	      event.touchCenterStart = this.session.startEvent.touchCenter;
+	    }
+	    if ((ref2 = this.session) != null ? ref2.lastEvent : void 0) {
+	      event.previous = this.session.lastEvent.point;
+	      event.deltaTime = event.time - this.session.lastEvent.time;
+	      event.delta = Utils.pointSubtract(event.point, this.session.lastEvent.point);
+	      event.deltaAngle = Utils.pointAngle(event.point, this.session.lastEvent.point);
+	      event.deltaDirection = this._getDirection(event.delta);
+	    }
+	    if (event.fingers > 1) {
+	      touchPointA = this._getTouchPoint(event, 0);
+	      touchPointB = this._getTouchPoint(event, 1);
+	      event.touchCenter = Utils.pointCenter(touchPointB, touchPointA);
+	      event.touchOffset = Utils.pointSubtract(touchPointB, touchPointA);
+	      event.touchDistance = _.max([GestureInputMinimumFingerDistance, Utils.pointDistance(touchPointA, touchPointB)]);
+	      event.rotation = Utils.pointAngle(touchPointA, touchPointB);
+	    }
+	    if ((ref3 = this.session) != null ? ref3.events : void 0) {
+	      events = _.filter(this.session.events, function(e) {
+	        if (e.eventCount === 0) {
+	          return false;
+	        }
+	        return e.time > (event.time - (GestureInputVelocityTime * 1000));
+	      });
+	      event.velocity = this._getVelocity(events);
+	    }
+	    if ((ref4 = this.session) != null ? ref4.started.pinch : void 0) {
+	      event.scale = event.touchDistance / this.session.started.pinch.touchDistance;
+	      event.scaleDirection = this._getScaleDirection(event.scale - this.session.lastEvent.scale);
+	      if (!event.scaleDirection && ((ref5 = this.session) != null ? ref5.lastEvent : void 0)) {
+	        event.scaleDirection = this.session.lastEvent.scaleDirection;
+	      }
+	    }
+	    if ((ref6 = this.session) != null ? ref6.lastEvent : void 0) {
+	      if ((event.fingers !== (ref7 = this.session.lastEvent.fingers) && ref7 === 2)) {
+	        event.delta = {
+	          x: 0,
+	          y: 0
+	        };
+	      }
+	      if (event.fingers === 2 && this.session.lastEvent.fingers === 2) {
+	        event.delta = Utils.pointSubtract(event.touchCenter, this.session.lastEvent.touchCenter);
+	      }
+	    }
+	    if ((ref8 = this.session) != null ? ref8.lastEvent : void 0) {
+	      if (this.session.force) {
+	        event.force = this.session.force;
+	      }
+	    }
+	    ref9 = ["point", "start", "previous", "offset", "delta", "velocity", "touchCenter", "touchOffset"];
+	    for (i = 0, len = ref9.length; i < len; i++) {
+	      pointKey = ref9[i];
+	      event[pointKey + "X"] = event[pointKey].x;
+	      event[pointKey + "Y"] = event[pointKey].y;
+	    }
+	    return event;
+	  };
+	
+	  GestureInputRecognizer.prototype._getTouchPoint = function(event, index) {
+	    var point;
+	    return point = {
+	      x: event.touches[index].pageX,
+	      y: event.touches[index].pageY
+	    };
+	  };
+	
+	  GestureInputRecognizer.prototype._getDirection = function(offset) {
+	    if (Math.abs(offset.x) > Math.abs(offset.y)) {
+	      if (offset.x > 0) {
+	        return "right";
+	      }
+	      if (offset.x < 0) {
+	        return "left";
+	      }
+	    }
+	    if (Math.abs(offset.x) < Math.abs(offset.y)) {
+	      if (offset.y < 0) {
+	        return "up";
+	      }
+	      if (offset.y > 0) {
+	        return "down";
+	      }
+	    }
+	    return null;
+	  };
+	
+	  GestureInputRecognizer.prototype._edgeForSwipeDirection = function(direction) {
+	    if (direction === "down") {
+	      return "top";
+	    }
+	    if (direction === "left") {
+	      return "right";
+	    }
+	    if (direction === "up") {
+	      return "bottom";
+	    }
+	    if (direction === "right") {
+	      return "left";
+	    }
+	    return null;
+	  };
+	
+	  GestureInputRecognizer.prototype._getScaleDirection = function(offset) {
+	    if (offset > 0) {
+	      return "up";
+	    }
+	    if (offset < 0) {
+	      return "down";
+	    }
+	    return null;
+	  };
+	
+	  GestureInputRecognizer.prototype._createEvent = function(type, event) {
+	    var k, touchEvent, v;
+	    touchEvent = document.createEvent("MouseEvent");
+	    touchEvent.initMouseEvent(type, true, true, window, event.detail, event.screenX, event.screenY, event.clientX, event.clientY, event.ctrlKey, event.shiftKey, event.altKey, event.metaKey, event.button, event.relatedTarget);
+	    touchEvent.touches = event.touches;
+	    touchEvent.changedTouches = event.touches;
+	    touchEvent.targetTouches = event.touches;
+	    for (k in event) {
+	      v = event[k];
+	      touchEvent[k] = v;
+	    }
+	    return touchEvent;
+	  };
+	
+	  GestureInputRecognizer.prototype._dispatchEvent = function(type, event, target) {
+	    var ref, ref1, touchEvent;
+	    touchEvent = this._createEvent(type, event);
+	    if (target == null) {
+	      target = (ref = this.session) != null ? (ref1 = ref.startEvent) != null ? ref1.target : void 0 : void 0;
+	    }
+	    if (target == null) {
+	      target = event.target;
+	    }
+	    return target.dispatchEvent(touchEvent);
+	  };
+	
+	  GestureInputRecognizer.prototype._getVelocity = function(events) {
+	    var current, first, time, velocity;
+	    if (events.length < 2) {
+	      return {
+	        x: 0,
+	        y: 0
+	      };
+	    }
+	    current = events[events.length - 1];
+	    first = events[0];
+	    time = current.time - first.time;
+	    velocity = {
+	      x: (current.point.x - first.point.x) / time,
+	      y: (current.point.y - first.point.y) / time
+	    };
+	    if (velocity.x === Infinity) {
+	      velocity.x = 0;
+	    }
+	    if (velocity.y === Infinity) {
+	      velocity.y = 0;
+	    }
+	    return velocity;
+	  };
+	
+	  return GestureInputRecognizer;
+
+	})();
+
+
+/***/ },
+/* 54 */
 /***/ function(module, exports) {
 
-	exports.date = 1450455017;
+	exports.date = 1460473608;
 	
 	exports.branch = "master";
 	
-	exports.hash = "6b2f999";
+	exports.hash = "bd79c54";
 	
-	exports.build = 1175;
+	exports.build = 1663;
 	
 	exports.version = exports.branch + "/" + exports.hash;
 

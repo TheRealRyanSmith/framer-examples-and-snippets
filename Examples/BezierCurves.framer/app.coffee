@@ -1,5 +1,5 @@
 # Bezier Curves
-# Great article on Smashinb Magazine to understand things
+# Great article on Smashinb Magazine to learn more about Bezier Curves
 # https://www.smashingmagazine.com/2014/04/understanding-css-timing-functions/
 
 Framer.Defaults.Animation =
@@ -10,8 +10,12 @@ Framer.Defaults.Animation =
 
 layerA = new Layer
 	y: 100
-	backgroundColor: "red"
+	backgroundColor: "rgba(44,153,211,1)"
 	borderRadius: 400
+	html: "Click Me"
+	style:
+		"text-align":"center"
+		"line-height":"200px"
 layerA.centerX()
 layerA.states.add
 	b: y: 600
