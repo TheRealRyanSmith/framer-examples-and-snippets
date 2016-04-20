@@ -18,8 +18,14 @@ scroll.contentInset =
 	top:128, right:0, bottom:0, left: 0
 
 navBar = new Layer
-	x: 0
-	y: 0
 	width: Screen.width
 	height: 128
 	backgroundColor: "#eaeaea"
+	html: "Scroll Component"
+	style:
+		"font-family": "-apple-system"
+		"font-size": "32px"
+		"font-weight": "500"
+		"color": "#222"
+		"line-height": "148px"
+		"text-align": "center"
