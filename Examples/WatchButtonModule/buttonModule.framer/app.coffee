@@ -22,10 +22,10 @@ buttonDefault= new Layer
 
 
 # invoke the button animation function
-buttonPrimary.on Events.Click, ->
+buttonPrimary.onClick ->
 	buttonModule.buttonAnimation(buttonPrimary)
 
-buttonDefault.on Events.Click, ->
+buttonDefault.onClick ->
 	buttonModule.buttonAnimation(buttonDefault)
 
 
