@@ -2,7 +2,7 @@
 
 *Organizing my Framer Studio examples and snippets.*
 
-## Sketch / Photoshop Import
+## Global Layers
 
 Remove the need to preceded the layer name with the file name when importing Sketch of Photoshop files by adding 'Utils.globalLayers(mySketchFile)' below the importer line. For example:
 
@@ -12,6 +12,33 @@ mySketchFile = Framer.Importer.load("imported/grid-images@1x")
 
 Utils.globalLayers(mySketchFile)
 ```
+
+
+
+
+## Backgrounds
+
+### Solid
+
+```coffee
+bg = new BackgroundLayer backgroundColor: "#eaeaea"
+```
+
+### Gradient
+
+```coffee
+bg = new BackgroundLayer
+bg.style.background = "-webkit-linear-gradient(top, #FFFFFF 0%, #E0E3E8 100%)"
+```
+
+### Canvas Background
+
+```coffee
+Canvas.backgroundColor = "B3E3FF"
+```
+
+
+
 
 ## Lighten
 
@@ -27,6 +54,9 @@ for i in [0..3]
 		x: 250 * i
 		backgroundColor: keyColor.lighten(5)
 ```
+
+
+
 
 ## Scrolling
 
@@ -111,4 +141,23 @@ navBar = new Layer
 		"font-weight": "500"
 		"line-height": "148px"
 		"text-align": "center"
+```
+
+
+
+
+## Loop.delta
+
+`Framer.Loop.delta = 1 / 1000`
+
+Slows down animations to make fine tuning easier. Adjust the last number (1000) to control amount. For example:
+
+```coffee
+layerA = new Layer
+layerA.animate
+	properties: { x: 400, y: 400 }
+	curve: "spring(600, 40, 0)"
+
+# Slow down animations
+Framer.Loop.delta = 1 / 1000
 ```
