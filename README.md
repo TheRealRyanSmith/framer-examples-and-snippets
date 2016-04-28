@@ -161,3 +161,16 @@ layerA.animate
 # Slow down animations
 Framer.Loop.delta = 1 / 1000
 ```
+
+
+
+
+## Math.abs
+
+Returns the absolute value of a number. This is useful when you don't care if the number is positive or negative. For example, in a scrolling layer you might want to know if a layer has moved by a certain threshold irregardless of positive or negative. It's easier and more streamlined to subtract numbers when you're not dealing with negatives.
+
+```coffee
+dragLayerEnd = Math.abs(dragLayer.y)
+amountMoved = dragLayerStart - dragLayerEnd
+```
+
