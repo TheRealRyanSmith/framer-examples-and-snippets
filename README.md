@@ -122,6 +122,16 @@ print arrayOfObjects[0].name
 print arrayOfObjects[0].favoriteColor
 ```
 
+### Push layers to an array
+```coffee
+layerArr = []
+for i in [0..3]
+    layer = new Layer
+        name: "layer_" + i
+    layerArr.push(layer)
+print layerArr
+```
+
 
 
 
@@ -146,7 +156,18 @@ navBar = new Layer
 
 
 
-## Loop.delta
+## Animation
+
+### Alternate between two animations
+
+```coffee
+animationA.on(Events.AnimationEnd, animationB.start)
+animationB.on(Events.AnimationEnd, animationA.start)
+
+animationA.start()
+```
+
+### Loop.delta
 
 `Framer.Loop.delta = 1 / 1000`
 
