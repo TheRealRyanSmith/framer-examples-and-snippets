@@ -186,6 +186,18 @@ Framer.Loop.delta = 1 / 1000
 
 
 
+## Utils.Modulate
+```coffee
+# input value, input range, output range, true (limits output to values set in output)
+Utils.modulate(value, [0, 1], [0, 100], true) # input value, input range, output range
+
+# example usage
+layerA.y = Utils.modulate this.y, [0, 1], [0, 2]
+```
+
+
+
+
 ## Math.abs
 
 Returns the absolute value of a number. This is useful when you don't care if the number is positive or negative. For example, in a scrolling layer you might want to know if a layer has moved by a certain threshold irregardless of positive or negative. It's easier and more streamlined to subtract numbers when you're not dealing with negatives.
