@@ -197,6 +197,12 @@ animationB.on(Events.AnimationEnd, animationA.start)
 animationA.start()
 ```
 
+### Create reverse of animation
+
+```coffee
+animationB = animationA.reverse()
+```
+
 ### Loop.delta
 
 `Framer.Loop.delta = 1 / 1000`
