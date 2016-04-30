@@ -102,6 +102,21 @@ scroll.contentInset =
 
 
 
+## Paging
+
+```coffee
+pager = new PageComponent
+	scrollVertical: false
+
+pager.addPage listView
+pager.addPage detailView
+
+pager.snapToPage listView, false # false makes it instant
+```
+
+
+
+
 ## Arrays and Objects
 
 ```coffee
