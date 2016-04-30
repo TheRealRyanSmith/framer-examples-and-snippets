@@ -188,6 +188,16 @@ navBar = new Layer
 
 ## Animation
 
+### Spring Curve
+
+Tension – how tight the spring is coiled
+Friction – how much effort it takes to move the object
+Velocity - the initial speed that launches the object
+
+```coffee
+spring(400, 40, 0)
+```
+
 ### Alternate between two animations
 
 ```coffee
