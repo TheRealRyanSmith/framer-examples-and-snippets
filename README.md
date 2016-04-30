@@ -117,6 +117,21 @@ pager.snapToPage listView, false # false makes it instant
 
 
 
+## Functions
+
+```coffee
+fade = (layer) ->
+	layer.animate
+		properties:
+			opacity: 0
+		time: 0.3
+
+fade(layerA)
+```
+
+
+
+
 ## Arrays and Objects
 
 ```coffee
