@@ -52,7 +52,7 @@ for i in [0..3]
 	layer = new Layer
 		width: 250, height: 250
 		x: 250 * i
-		backgroundColor: keyColor.lighten(5)
+		backgroundColor: keyColor.lighten(i * 10)
 ```
 
 
