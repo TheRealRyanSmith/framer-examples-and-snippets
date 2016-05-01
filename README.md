@@ -74,13 +74,13 @@ longLayer = new Layer
 
 ```coffee
 # listen for scroll; print Y position (test)
-scroll.on Events.Scroll, ->
-    print scroll.scrollY
+scroller.onScroll ->
+    print scroller.scrollY
 
 # Prevent dragging beyond top
-# listen for scroll and prevent scrolling past y = 0
-scroll.on Events.Scroll, ->
-    if scroll.scrollY <= 0 then scroll.scrollY = 0
+# listen for layer moving and prevent pulling down
+scroller.onMove ->
+	if scroller.scrollY <= 0 then scroller.scrollY = 0
 ```
 
 ```coffee
