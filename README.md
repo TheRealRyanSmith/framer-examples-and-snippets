@@ -153,6 +153,7 @@ print arrayOfObjects[0].favoriteColor
 ```
 
 ### Push layers to an array
+
 ```coffee
 layerArr = []
 for i in [0..3]
@@ -160,6 +161,19 @@ for i in [0..3]
         name: "layer_" + i
     layerArr.push(layer)
 print layerArr
+```
+
+### Assign a name based on the index number
+
+```coffee
+for i in [0..4]
+	layerA = new Layer
+		name: "loopLayer" + i
+		y: 136
+		x: (150 * i) + 3
+		width: 144
+		height: 144
+	print layerA.name
 ```
 
 
