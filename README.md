@@ -167,13 +167,25 @@ print layerArr
 
 ```coffee
 for i in [0..4]
-	layerA = new Layer
-		name: "loopLayer" + i
-		y: 136
-		x: (150 * i) + 3
-		width: 144
-		height: 144
-	print layerA.name
+	layer = new Layer
+		name: "layer_" + i
+		y: 172 * i
+		x: 0
+		width: Screen.width
+		height: 150
+	print layer.name
+
+	layer.onClick ->
+		if @.name == "layer_0"
+			print "layer 0 tapped"
+		else if @.name == "layer_1"
+			print "layer 1 tapped"
+		else if @.name == "layer_2"
+			print "layer 2 tapped"
+		else if @.name == "layer_3"
+			print "layer 3 tapped"
+		else if @.name == "layer_4"
+			print "layer 4 tapped"
 ```
 
 
