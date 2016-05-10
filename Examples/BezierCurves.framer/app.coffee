@@ -9,7 +9,7 @@ Framer.Defaults.Animation =
 	time: 0.6
 
 layerA = new Layer
-	y: 100
+	y: Screen.height * 0.08
 	backgroundColor: "rgba(44,153,211,1)"
 	borderRadius: 400
 	html: "Click Me"
@@ -18,7 +18,7 @@ layerA = new Layer
 		"line-height":"200px"
 layerA.centerX()
 layerA.states.add
-	b: y: 600
+	b: maxY: Screen.height - (Screen.height * 0.08)
 
-layerA.on Events.Click, ->
+layerA.onClick ->
 	layerA.states.next()
