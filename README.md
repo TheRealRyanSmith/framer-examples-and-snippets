@@ -279,3 +279,40 @@ dragLayerEnd = Math.abs(dragLayer.y)
 amountMoved = dragLayerStart - dragLayerEnd
 ```
 
+
+
+
+## Preferences
+
+Notes from [Managing Styles and CSS in Framer](http://martenbjork.com/2016/05/managing-styles-and-css-in-framer/) by Marten Bjork. Excellent article!
+
+```coffee
+# Add a default to all layers (not recommended)
+Framer.Defaults.Layer.backgroundColor = "#ffcd02"
+
+# Create preferences
+prefs = {}
+prefs.margin = 20
+prefs.borderRadius = 12
+# Create a styles preference
+prefs.styles = {}
+# One for bodyText
+prefs.styles.bodyText =
+	fontFamily: 'Avenir'
+	fontWeight: 500
+	fontSize: '72px'
+	textAlign: 'center'
+	lineHeight: '300px'
+
+# Use preferences on a layer
+layerA = new Layer
+	x: prefs.margin
+	y: prefs.margin
+	size: 300
+	borderRadius: prefs.borderRadius
+	html: "My layer"
+	style: prefs.styles.bodyText
+```
+
+[View an example file](http://share.framerjs.com/36d3yp71dudn/) – Click link and then click open to download and see code above in action.
+
